@@ -24,12 +24,12 @@ Este repositório contém a aplicação CRM whitelabel configurada exclusivament
 - **Host**: `localhost` (ou `172.17.0.1` na rede interna Docker)
 - **Porta**: `5432`
 - **Usuário**: `simoesadv`
-- **Senha**: `W8s3N9m2K7vL4q1Z`
+- **Senha**: `GhyHt8TY8Swp7cCW`
 - **Nome do Banco de Dados**: `simoesadv` (ou `crm_simoesadv_db`)
 - **Permissão**: `Super Usuário`
 - **String de Conexão (`DATABASE_URL`)**:
   ```env
-  DATABASE_URL="postgres://simoesadv:W8s3N9m2K7vL4q1Z@172.17.0.1:5432/simoesadv"
+  DATABASE_URL="postgres://simoesadv:GhyHt8TY8Swp7cCW@172.17.0.1:5432/simoesadv"
   ```
 
 ### Script de Criação no PostgreSQL:
