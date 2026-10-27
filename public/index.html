@@ -1,0 +1,2322 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel CRM</title>
+  <!-- Google Fonts: Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css?v=5">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="icon" type="image/jpg" sizes="32x32" href="assets/favicon_simoesadv.jpg">
+  <!-- Auth helper (must load before app.js) -->
+  <script src="js/auth.js"></script>
+  <script>
+    // Aplica data-role imediatamente no <html> antes da primeira renderização da tela
+    (function() {
+      try {
+        var u = JSON.parse(localStorage.getItem('crm_auth_user'));
+        if (u && u.role) {
+          document.documentElement.setAttribute('data-role', u.role);
+        }
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-icon">
+          <img src="assets/logo_simoesadv.jpg" class="app-company-logo" alt="Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+        </div>
+        <span class="logo-text app-company-name">CRM</span>
+      </div>
+      
+      <nav class="sidebar-nav" id="sidebar-nav">
+        <a href="#crm-kanban-sdr" class="nav-item" id="nav-crm-kanban-sdr" data-section="crm-kanban-sdr">
+          <i data-lucide="kanban"></i>
+          <span>Kanban SDR | Comercial</span>
+        </a>
+        <a href="#crm-kanban-closer" class="nav-item" id="nav-crm-kanban-closer" data-section="crm-kanban-closer">
+          <i data-lucide="layout-grid"></i>
+          <span>Kanban Consultor | Closer</span>
+        </a>
+        <a href="#crm-clientes" class="nav-item" id="nav-crm-clientes" data-section="crm-clientes">
+          <i data-lucide="search"></i>
+          <span>Busca &amp; Tabulações</span>
+        </a>
+        <a href="#crm-relatorios" class="nav-item" id="nav-crm-relatorios" data-section="crm-relatorios">
+          <i data-lucide="bar-chart-3"></i>
+          <span>Relatórios</span>
+        </a>
+        <div class="sidebar-divider" style="height: 1px; background: rgba(255,255,255,0.1); margin: 10px 20px;"></div>
+        <a href="#users" class="nav-item" id="nav-users" data-section="users">
+          <i data-lucide="shield-check"></i>
+          <span>Usuários &amp; Acessos</span>
+        </a>
+        <a href="#crm-admin" class="nav-item" id="nav-crm-admin" data-section="crm-admin">
+          <i data-lucide="settings-2"></i>
+          <span>Admin CRM &amp; Fila</span>
+        </a>
+
+      </nav>
+      
+      <div class="sidebar-footer">
+        <p>Desenvolvido - ConnectMax</p>
+        <span class="vps-tag"><i data-lucide="server"></i> Server Active</span>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- TOP HEADER -->
+      <header class="top-header">
+        <div class="header-title-wrapper" style="display: flex; align-items: center; gap: 12px;">
+          <img src="assets/logo_simoesadv.jpg" class="app-company-logo" alt="Logo" style="width: 48px; height: 48px; object-fit: cover; border-radius: 8px;">
+          <div>
+            <h1 id="page-title">Dashboard Analítico</h1>
+            <p id="page-subtitle" class="text-muted">Acompanhamento comercial em tempo real</p>
+          </div>
+        </div>
+        <div class="header-actions" style="display:flex; align-items:center; gap:12px;">
+          <div class="date-indicator">
+            <i data-lucide="calendar"></i>
+            <span id="current-date-span">Carregando...</span>
+          </div>
+          <!-- User Badge -->
+          <div id="user-badge" style="display:flex; align-items:center; gap:10px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:10px; padding:7px 14px; cursor:default;">
+            <i data-lucide="user-circle" style="width:18px;height:18px;"></i>
+            <div style="line-height:1.2;">
+              <div style="font-size:13px; font-weight:600;" id="header-username">—</div>
+              <div style="font-size:11px; opacity:0.55;" id="header-role">—</div>
+            </div>
+          </div>
+          <button id="btn-logout" onclick="logout()" title="Sair" style="display:flex; align-items:center; gap:6px; background:rgba(255,92,92,0.12); border:1px solid rgba(255,92,92,0.25); color:#ff8080; border-radius:10px; padding:8px 14px; font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,92,92,0.22)'" onmouseout="this.style.background='rgba(255,92,92,0.12)'">
+            <i data-lucide="log-out" style="width:15px;height:15px;"></i> Sair
+          </button>
+        </div>
+      </header>
+
+      <!-- VIEW: DASHBOARD -->
+      <section id="view-dashboard" class="view-section hidden">
+        
+        <!-- DASHBOARD FILTERS -->
+        <div class="card filter-card">
+          <div class="filter-grid">
+            
+            <div class="filter-group">
+              <label for="filter-period"><i data-lucide="calendar-days"></i> Período</label>
+              <select id="filter-period" class="form-input">
+                <option value="diario">Hoje (Diário)</option>
+                <option value="semanal">Esta Semana (Semanal)</option>
+                <option value="mensal" selected>Este Mês (Mensal)</option>
+                <option value="custom">Personalizado</option>
+              </select>
+            </div>
+            
+            <div class="filter-group date-picker-group hidden" id="custom-date-container">
+              <label><i data-lucide="calendar-range"></i> Intervalo de Datas</label>
+              <div class="date-range-inputs">
+                <input type="date" id="filter-start-date" class="form-input">
+                <span>até</span>
+                <input type="date" id="filter-end-date" class="form-input">
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <label for="filter-team"><i data-lucide="users"></i> Filtrar por Equipe</label>
+              <select id="filter-team" class="form-input">
+                <option value="">Todas as Equipes</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="filter-consultant"><i data-lucide="user"></i> Filtrar por Consultor</label>
+              <select id="filter-consultant" class="form-input">
+                <option value="">Todos os Consultores</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="filter-channel"><i data-lucide="megaphone"></i> Filtrar por Canal de Venda</label>
+              <select id="filter-channel" class="form-input">
+                <option value="">Todos os Canais</option>
+              </select>
+            </div>
+            
+          </div>
+        </div>
+
+        <!-- KPI CARDS GRID -->
+        <div class="kpi-grid">
+          
+          <div class="kpi-card text-glow-blue">
+            <div class="kpi-icon-wrapper bg-blue">
+              <i data-lucide="phone-call"></i>
+            </div>
+            <div class="kpi-content">
+              <h3>Leads Totais</h3>
+              <p id="kpi-leads-totais" class="kpi-value">0</p>
+              <span class="kpi-label">Volume bruto recebido</span>
+            </div>
+          </div>
+
+          <div class="kpi-card text-glow-orange">
+            <div class="kpi-icon-wrapper bg-orange">
+              <i data-lucide="phone-off"></i>
+            </div>
+            <div class="kpi-content">
+              <h3>Leads Inviáveis</h3>
+              <p id="kpi-leads-inviaveis" class="kpi-value">0</p>
+              <span id="kpi-leads-inviaveis-label" class="kpi-label">0.00% dos leads recebidos</span>
+            </div>
+          </div>
+
+          <div class="kpi-card text-glow-cyan">
+            <div class="kpi-icon-wrapper bg-cyan">
+              <i data-lucide="user-check"></i>
+            </div>
+            <div class="kpi-content">
+              <h3>Leads Aproveitáveis</h3>
+              <p id="kpi-leads-aproveitaveis" class="kpi-value">0</p>
+              <span class="kpi-label">Leads válidos para venda</span>
+            </div>
+          </div>
+
+          <div class="kpi-card text-glow-purple">
+            <div class="kpi-icon-wrapper bg-purple">
+              <i data-lucide="shopping-bag"></i>
+            </div>
+            <div class="kpi-content">
+              <h3>Vendas Fechadas</h3>
+              <p id="kpi-fechados" class="kpi-value">0</p>
+              <span class="kpi-label">Contratos assinados</span>
+            </div>
+          </div>
+
+          <div class="kpi-card text-glow-emerald highlight-card">
+            <div class="kpi-icon-wrapper bg-emerald">
+              <i data-lucide="percent"></i>
+            </div>
+            <div class="kpi-content">
+              <h3>Conversão Reajustada</h3>
+              <p id="kpi-conversao" class="kpi-value">0.00%</p>
+              <span class="kpi-label">Excluindo leads inviáveis</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CHARTS SECTION -->
+        <div class="charts-grid">
+          
+          <div class="card chart-card">
+            <div class="card-header">
+              <h2>Evolução Comercial</h2>
+              <span class="text-muted small">Tendência diária de conversão e volume</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="evolutionChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card chart-card">
+            <div class="card-header">
+              <h2>Performance por Canal</h2>
+              <span class="text-muted small">Leads vs Vendas fechadas</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="channelChart"></canvas>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RANKING TABLES -->
+        <div class="rankings-grid">
+          
+          <!-- CONSULTANT RANKING -->
+          <div class="card table-card">
+            <div class="card-header">
+              <h2>Ranking de Consultores</h2>
+              <span class="text-muted small">Ordenado por % de conversão</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th width="80px">Pos.</th>
+                    <th>Consultor</th>
+                    <th>Equipe</th>
+                    <th class="text-center">Aproveitáveis</th>
+                    <th class="text-center">Vendas</th>
+                    <th class="text-right">Conversão</th>
+                  </tr>
+                </thead>
+                <tbody id="ranking-consultants-body">
+                  <tr>
+                    <td colspan="6" class="text-center text-muted">Carregando dados...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- TEAM RANKING -->
+          <div class="card table-card">
+            <div class="card-header">
+              <h2>Ranking de Equipes</h2>
+              <span class="text-muted small">Ordenado por % de conversão</span>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th width="80px">Pos.</th>
+                    <th>Equipe</th>
+                    <th class="text-center">Aproveitáveis</th>
+                    <th class="text-center">Vendas</th>
+                    <th class="text-right">Conversão</th>
+                  </tr>
+                </thead>
+                <tbody id="ranking-teams-body">
+                  <tr>
+                    <td colspan="5" class="text-center text-muted">Carregando dados...</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- VIEW: LAUNCHES (DATA ENTRY) -->
+      <section id="view-launches" class="view-section hidden">
+
+
+        <!-- SELECTION CARD -->
+        <div class="card filter-card">
+          <div class="filter-grid">
+            
+            <div class="filter-group">
+              <label for="launch-date"><i data-lucide="calendar"></i> Data do Lançamento</label>
+              <input type="date" id="launch-date" class="form-input">
+            </div>
+
+            <div class="filter-group">
+              <label for="launch-team"><i data-lucide="users"></i> Equipe</label>
+              <select id="launch-team" class="form-input">
+                <option value="">-- Selecione a Equipe --</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="launch-consultant"><i data-lucide="user"></i> Consultor Comercial</label>
+              <select id="launch-consultant" class="form-input">
+                <option value="">-- Selecione o Consultor --</option>
+              </select>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- NO CONSULTANT SELECTED PLACEHOLDER -->
+        <div id="launch-placeholder" class="card placeholder-card">
+          <i data-lucide="edit-3"></i>
+          <h3>Preenchimento Diário de Métricas</h3>
+          <p class="text-muted">Selecione o Consultor Comercial e a Data para gerar a grade de canais e iniciar o lançamento.</p>
+        </div>
+
+        <!-- GRID LAUNCH FORM CONTAINER -->
+        <div id="launch-form-container" class="card table-card hidden">
+          <div class="card-header flex-header">
+            <div>
+              <h2 id="launch-form-title">Grade de Canais de Venda</h2>
+              <p class="text-muted small">Digite as métricas numéricas coletadas para o dia selecionado.</p>
+            </div>
+            <span class="badge info-badge" id="selected-consultant-badge"></span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table launch-table">
+              <thead>
+                <tr>
+                  <th>Canal de Venda</th>
+                  <th width="150px" class="text-center">Leads Totais</th>
+                  <th width="150px" class="text-center">Leads Inviáveis</th>
+                  <th width="150px" class="text-center">Aproveitáveis</th>
+                  <th width="150px" class="text-center">Fechados (Vendas)</th>
+                  <th class="text-left">Observações</th>
+                </tr>
+              </thead>
+              <tbody id="launch-table-body">
+                <!-- Dynamically filled with javascript -->
+              </tbody>
+              <tfoot>
+                <tr class="total-row">
+                  <td>Total Consolidado</td>
+                  <td class="text-center" id="launch-total-leads">0</td>
+                  <td class="text-center" id="launch-total-inviaveis">0</td>
+                  <td class="text-center" id="launch-total-aproveitaveis">0</td>
+                  <td class="text-center" id="launch-total-fechados">0</td>
+                  <td>
+                    <div class="conversion-total-display">
+                      Conversão Geral Reajustada: <strong id="launch-total-conversion" class="text-emerald">0.00%</strong>
+                    </div>
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <div class="form-actions-bar">
+            <div id="launch-validation-message" class="validation-message error-message hidden">
+              <!-- Validation text will be inserted here -->
+            </div>
+            <button id="btn-save-launches" class="btn btn-primary btn-large">
+              <i data-lucide="check-circle-2"></i> Salvar Lançamentos
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- VIEW: REGISTROS -->
+      <section id="view-records" class="view-section hidden">
+        <div class="card filter-card">
+          <div class="filter-grid">
+            <div class="filter-group">
+              <label for="records-start-date"><i data-lucide="calendar-range"></i> Data inicial</label>
+              <input type="date" id="records-start-date" class="form-input">
+            </div>
+            <div class="filter-group">
+              <label for="records-end-date"><i data-lucide="calendar-range"></i> Data final</label>
+              <input type="date" id="records-end-date" class="form-input">
+            </div>
+            <div class="filter-group">
+              <label for="records-team"><i data-lucide="users"></i> Equipe</label>
+              <select id="records-team" class="form-input">
+                <option value="">Todas as Equipes</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="records-consultant"><i data-lucide="user"></i> Consultor</label>
+              <select id="records-consultant" class="form-input">
+                <option value="">Todos os Consultores</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="records-channel"><i data-lucide="megaphone"></i> Canal</label>
+              <select id="records-channel" class="form-input">
+                <option value="">Todos os Canais</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card table-card">
+          <div class="card-header">
+            <div>
+              <h2>Últimos Lançamentos</h2>
+              <p class="text-muted small">Consulta rápida dos registros enviados com filtros para não sobrecarregar a tela.</p>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Consultor</th>
+                  <th>Equipe</th>
+                  <th>Canal</th>
+                  <th class="text-center">Leads</th>
+                  <th class="text-center">Inviáveis</th>
+                  <th class="text-center">Aproveitáveis</th>
+                  <th class="text-center">Fechados</th>
+                  <th class="text-right">Conversão</th>
+                </tr>
+              </thead>
+              <tbody id="records-table-body">
+                <tr>
+                  <td colspan="9" class="text-center text-muted">Carregando registros...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: SETTINGS & CONFIGS -->
+      <section id="view-settings" class="view-section hidden">
+        
+        <div class="settings-grid">
+          
+          <!-- TEAM MANAGEMENT -->
+          <div class="card form-card">
+            <div class="card-header">
+              <h2>Gestão de Equipes</h2>
+              <p class="text-muted small">Crie equipes para segmentar consultores</p>
+            </div>
+            
+            <form id="form-team" class="settings-form">
+              <div class="form-group-vertical">
+                <label for="team-name">Nome da Equipe</label>
+                <input type="text" id="team-name" class="form-input" placeholder="Ex: Equipe de Vendas São Paulo" required>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i data-lucide="plus"></i> Cadastrar Equipe
+              </button>
+            </form>
+
+            <hr class="card-divider">
+
+            <div class="list-wrapper">
+              <h3>Equipes Cadastradas</h3>
+              <ul class="settings-list" id="list-teams">
+                <!-- Javascript list -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- CONSULTANT MANAGEMENT -->
+          <div class="card form-card">
+            <div class="card-header">
+              <h2>Gestão de Consultores</h2>
+              <p class="text-muted small">Vincule consultores comerciais a equipes</p>
+            </div>
+            
+            <form id="form-consultant" class="settings-form">
+              <div class="form-group-vertical">
+                <label for="consultant-name">Nome do Consultor</label>
+                <input type="text" id="consultant-name" class="form-input" placeholder="Ex: João da Silva" required>
+              </div>
+              <div class="form-group-vertical">
+                <label for="consultant-team-id">Vincular à Equipe</label>
+                <select id="consultant-team-id" class="form-input" required>
+                  <option value="">-- Selecione uma Equipe --</option>
+                </select>
+              </div>
+              <div class="form-group-vertical">
+                <label for="consultant-progestor-user">Usuário Progestor (Ex: REALIZE.JACILENE)</label>
+                <input type="text" id="consultant-progestor-user" class="form-input" placeholder="Ex: REALIZE.JACILENE">
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i data-lucide="plus"></i> Cadastrar Consultor
+              </button>
+            </form>
+
+            <hr class="card-divider">
+
+            <div class="list-wrapper">
+              <h3>Consultores Cadastrados</h3>
+              <ul class="settings-list" id="list-consultants">
+                <!-- Javascript list -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- CHANNEL MANAGEMENT -->
+          <div class="card form-card">
+            <div class="card-header">
+              <h2>Canais de Venda</h2>
+              <p class="text-muted small">Gerencie a origem dos leads comerciais</p>
+            </div>
+            
+            <form id="form-channel" class="settings-form">
+              <div class="form-group-vertical">
+                <label for="channel-name">Nome do Canal</label>
+                <input type="text" id="channel-name" class="form-input" placeholder="Ex: Discadora" required>
+              </div>
+              <div class="form-group-vertical">
+                <label for="channel-progestor-code">ID do Canal no Progestor</label>
+                <input type="text" id="channel-progestor-code" class="form-input" placeholder="Ex: 31">
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i data-lucide="plus"></i> Cadastrar Canal
+              </button>
+            </form>
+
+            <hr class="card-divider">
+
+            <div class="list-wrapper">
+              <h3>Canais de Venda</h3>
+              <ul class="settings-list" id="list-channels">
+                <!-- Javascript list -->
+              </ul>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- SYSTEM MANAGEMENT (ADDED FOR LEADS) -->
+        <div class="settings-grid" style="margin-top: 24px;">
+          <div class="card form-card">
+            <div class="card-header">
+              <h2>Sistemas / Plataformas</h2>
+              <p class="text-muted small">Gerencie os sistemas utilizados para geração de leads</p>
+            </div>
+            
+            <form id="form-system" class="settings-form">
+              <div class="form-group-vertical">
+                <label for="system-name">Nome do Sistema</label>
+                <input type="text" id="system-name" class="form-input" placeholder="Ex: Meta Ads, Google Ads" required>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i data-lucide="plus"></i> Cadastrar Sistema
+              </button>
+            </form>
+
+            <hr class="card-divider">
+
+            <div class="list-wrapper">
+              <h3>Sistemas Cadastrados</h3>
+              <ul class="settings-list" id="list-systems">
+                <!-- Javascript list -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- CONVENIOS MANAGEMENT -->
+          <div class="card form-card">
+            <div class="card-header">
+              <h2>Convênios</h2>
+              <p class="text-muted small">Gerencie os convênios das campanhas</p>
+            </div>
+            
+            <form id="form-convenio" class="settings-form">
+              <div class="form-group-vertical">
+                <label for="convenio-name">Nome do Convênio</label>
+                <input type="text" id="convenio-name" class="form-input" placeholder="Ex: INSS" required>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i data-lucide="plus"></i> Cadastrar
+              </button>
+            </form>
+
+            <hr class="card-divider">
+
+            <div class="list-wrapper">
+              <h3>Convênios Cadastrados</h3>
+              <ul class="settings-list" id="list-convenios">
+                <!-- Javascript list -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- PRODUTOS MANAGEMENT -->
+          <div class="card form-card">
+            <div class="card-header">
+              <h2>Produtos</h2>
+              <p class="text-muted small">Gerencie os produtos das campanhas</p>
+            </div>
+            
+            <form id="form-produto" class="settings-form">
+              <div class="form-group-vertical">
+                <label for="produto-name">Nome do Produto</label>
+                <input type="text" id="produto-name" class="form-input" placeholder="Ex: Novo, Refin" required>
+              </div>
+              <button type="submit" class="btn btn-primary">
+                <i data-lucide="plus"></i> Cadastrar
+              </button>
+            </form>
+
+            <hr class="card-divider">
+
+            <div class="list-wrapper">
+              <h3>Produtos Cadastrados</h3>
+              <ul class="settings-list" id="list-produtos">
+                <!-- Javascript list -->
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROGESTOR INTEGRATION CONFIG CARD -->
+        <div class="settings-grid" style="margin-top: 24px;">
+          <div class="card form-card" style="grid-column: span 3;">
+            <div class="card-header">
+              <h2>Integração do Progestor</h2>
+              <p class="text-muted small">Configure a URL do JSON de tabulações e mapeie os códigos de status</p>
+            </div>
+            <form id="form-progestor-status-mapping" class="settings-form" style="display: flex; flex-direction: column; gap: 16px;">
+              <div class="form-group-vertical">
+                <label for="mapping-progestor-url">URL Principal do Progestor (Deixe em branco para usar a detecção automática)</label>
+                <input type="text" id="mapping-progestor-url" class="form-input" placeholder="https://sistemanovo.progestor21.com.br/sistema/atendimentos">
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group-vertical">
+                  <label for="mapping-closed-codes">Códigos de Status para Fechamento (Separados por vírgula)</label>
+                  <input type="text" id="mapping-closed-codes" class="form-input" placeholder="Ex: 43" required>
+                </div>
+                <div class="form-group-vertical">
+                  <label for="mapping-unviable-codes">Códigos de Status para Inviáveis (Separados por vírgula)</label>
+                  <input type="text" id="mapping-unviable-codes" class="form-input" placeholder="Ex: 33, 45" required>
+                </div>
+              </div>
+              <div style="display: flex; gap: 12px; align-self: flex-end; margin-top: 8px;">
+                <button type="button" id="btn-sync-progestor-history" class="btn btn-secondary" style="padding: 8px 24px;">
+                  <i data-lucide="refresh-cw"></i> Sincronizar Histórico Completo
+                </button>
+                <button type="submit" class="btn btn-primary" style="padding: 8px 24px;">
+                  <i data-lucide="save"></i> Salvar Configurações da Integração
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- VIEW: LEADS DASHBOARD -->
+      <section id="view-leads-dashboard" class="view-section hidden">
+        <div class="card filter-card">
+          <div class="filter-grid">
+            <div class="filter-group date-picker-group">
+              <label><i data-lucide="calendar-range"></i> Intervalo de Datas</label>
+              <div class="date-range-inputs">
+                <input type="date" id="leads-filter-start" class="form-input">
+                <span>até</span>
+                <input type="date" id="leads-filter-end" class="form-input">
+              </div>
+            </div>
+            <div class="filter-group">
+              <label><i data-lucide="megaphone"></i> Canal</label>
+              <select id="filter-leads-channel" class="form-input">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label><i data-lucide="monitor"></i> Sistema</label>
+              <select id="filter-leads-system" class="form-input">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label><i data-lucide="briefcase"></i> Convênio</label>
+              <select id="filter-leads-convenio" class="form-input">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label><i data-lucide="shopping-bag"></i> Produto</label>
+              <select id="filter-leads-produto" class="form-input">
+                <option value="">Todos</option>
+              </select>
+            </div>
+            <div class="filter-group" style="display: flex; align-items: flex-end;">
+              <button id="btn-filter-leads-dash" class="btn btn-primary" style="width: 100%;"><i data-lucide="filter"></i> Filtrar</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- LEADS KPI GRID -->
+        <div class="kpi-grid" style="margin-bottom: 24px;">
+          <div class="kpi-card text-glow-blue">
+            <div class="kpi-icon-wrapper bg-blue"><i data-lucide="users"></i></div>
+            <div class="kpi-content">
+              <h3>Prospectados</h3>
+              <p id="kpi-leads-prospectados" class="kpi-value">0</p>
+            </div>
+          </div>
+          <div class="kpi-card text-glow-green">
+            <div class="kpi-icon-wrapper bg-green"><i data-lucide="check-circle"></i></div>
+            <div class="kpi-content">
+              <h3>Aceites</h3>
+              <p id="kpi-leads-aceites" class="kpi-value">0</p>
+              <span id="kpi-leads-tx-resposta" class="kpi-label">0.00%</span>
+            </div>
+          </div>
+          <div class="kpi-card text-glow-orange">
+            <div class="kpi-icon-wrapper bg-orange"><i data-lucide="x-circle"></i></div>
+            <div class="kpi-content">
+              <h3>Inviáveis</h3>
+              <p id="kpi-leads-inviaveis-dash" class="kpi-value">0</p>
+              <span id="kpi-leads-tx-inviaveis" class="kpi-label">0.00%</span>
+            </div>
+          </div>
+          <div class="kpi-card text-glow-emerald">
+            <div class="kpi-icon-wrapper bg-emerald"><i data-lucide="briefcase"></i></div>
+            <div class="kpi-content">
+              <h3>Fechamento do Dia</h3>
+              <p id="kpi-leads-fechamentos" class="kpi-value">0</p>
+              <span id="kpi-leads-tx-fechamento" class="kpi-label">0.00%</span>
+            </div>
+          </div>
+          <div class="kpi-card text-glow-green">
+            <div class="kpi-icon-wrapper bg-green"><i data-lucide="trending-up"></i></div>
+            <div class="kpi-content">
+              <h3>ROI</h3>
+              <p id="kpi-leads-roi" class="kpi-value">0.00%</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+          <div class="kpi-card text-glow-red">
+            <div class="kpi-icon-wrapper" style="background: rgba(220,53,69,0.1); color: #dc3545;"><i data-lucide="dollar-sign"></i></div>
+            <div class="kpi-content">
+              <h3>Investimento Previsto</h3>
+              <p id="kpi-leads-investimento" class="kpi-value" style="color:#dc3545;">R$ 0,00</p>
+            </div>
+          </div>
+          <div class="kpi-card text-glow-emerald">
+            <div class="kpi-icon-wrapper bg-emerald"><i data-lucide="dollar-sign"></i></div>
+            <div class="kpi-content">
+              <h3>Faturamento Total Previsto</h3>
+              <p id="kpi-leads-faturamento" class="kpi-value text-emerald">R$ 0,00</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: LEADS RECORDS -->
+      <section id="view-leads-records" class="view-section hidden">
+        <div class="card form-card" style="margin-bottom: 24px;">
+          <div class="card-header">
+            <h2>Novo Registro de Geração de Leads</h2>
+            <p class="text-muted small">Lance os resultados diários da operação (com ou sem ação de leads)</p>
+          </div>
+          
+          <form id="form-lead-generation" class="settings-form">
+            <div class="kpi-grid" style="grid-template-columns: repeat(3, 1fr); gap: 16px;">
+              <div class="form-group-vertical">
+                <label for="lead-date">Data *</label>
+                <input type="date" id="lead-date" class="form-input" required>
+              </div>
+              <div class="form-group-vertical">
+                <label for="lead-channel">Canal de Venda</label>
+                <select id="lead-channel" class="form-input">
+                  <option value="">-- Nenhum --</option>
+                </select>
+              </div>
+              <div class="form-group-vertical">
+                <label for="lead-system">Sistema</label>
+                <select id="lead-system" class="form-input">
+                  <option value="">-- Nenhum --</option>
+                </select>
+              </div>
+              <div class="form-group-vertical">
+                <label for="lead-convenio">Convênio *</label>
+                <select id="lead-convenio" class="form-input" required>
+                  <option value="">-- Selecione --</option>
+                </select>
+              </div>
+              <div class="form-group-vertical">
+                <label for="lead-produto">Produto *</label>
+                <select id="lead-produto" class="form-input" required>
+                  <option value="">-- Selecione --</option>
+                </select>
+              </div>
+              <div class="form-group-vertical">
+                <label for="lead-prospectados">Prospectados</label>
+                <input type="number" id="lead-prospectados" class="form-input" value="0" min="0">
+              </div>
+              <div class="form-group-vertical">
+                <label for="lead-aceites">Aceites</label>
+                <input type="number" id="lead-aceites" class="form-input" value="0" min="0">
+              </div>
+              <div class="form-group-vertical">
+                <label for="lead-inviaveis">Inviáveis</label>
+                <input type="number" id="lead-inviaveis" class="form-input" value="0" min="0">
+              </div>
+              <div class="form-group-vertical">
+                <label for="lead-investimento">Investimento Previsto (R$)</label>
+                <input type="number" step="0.01" id="lead-investimento" class="form-input" value="0.00" min="0">
+              </div>
+              <div class="form-group-vertical">
+                <label for="lead-fechamentos">Fechamento do Dia (Qtd)</label>
+                <input type="number" id="lead-fechamentos" class="form-input" value="0" min="0">
+              </div>
+              <div class="form-group-vertical">
+                <label for="lead-faturamento">Faturamento Previsto (R$)</label>
+                <input type="number" step="0.01" id="lead-faturamento" class="form-input" value="0.00" min="0">
+              </div>
+              <div class="form-group-vertical" id="lead-expand-consultants-wrapper" style="display: none; align-items: flex-start; justify-content: center; height: 100%;">
+                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; margin-top: 24px; font-weight: 500; color: var(--text-color);">
+                  <input type="checkbox" id="lead-expand-consultants" style="width: 18px; height: 18px; cursor: pointer;">
+                  Distribuir por Consultores?
+                </label>
+              </div>
+            </div>
+
+            <!-- Seção de Distribuição por Consultores (Exclusiva para "Disparo WhatsApp") -->
+            <div id="lead-distribution-container" class="hidden" style="margin-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.1); padding-top: 20px;">
+              <h3 style="margin-bottom: 8px; font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; gap: 8px; color: var(--text-color);">
+                <i data-lucide="users" style="color: var(--primary-color);"></i> Distribuição por Consultores
+              </h3>
+              <p class="text-muted small" style="margin-bottom: 16px;">
+                Distribua os leads deste lote entre os consultores. O preenchimento irá lançar automaticamente na Grade de Canais de Venda e atualizar os totais do formulário (Aceites, Inviáveis e Fechados).
+              </p>
+              
+              <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Consultor</th>
+                      <th style="width: 150px;">Leads Recebidos</th>
+                      <th style="width: 150px;">Inviáveis</th>
+                      <th style="width: 150px;">Fechados (Vendas)</th>
+                      <th style="width: 150px;">Faturamento (R$)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="lead-distribution-tbody">
+                    <!-- Gerado dinamicamente via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div style="margin-top: 16px;">
+              <button type="submit" class="btn btn-primary">
+                <i data-lucide="save"></i> Salvar Registro
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card table-card">
+          <div class="card-header">
+            <h2>Histórico de Registros</h2>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="leads-records-table">
+              <thead>
+                <tr>
+                  <th>Data</th>
+                  <th>Canal</th>
+                  <th>Sistema</th>
+                  <th>Convênio</th>
+                  <th>Produto</th>
+                  <th>Prospec.</th>
+                  <th>Aceites</th>
+                  <th>Inviáveis</th>
+                  <th>Invest.</th>
+                  <th>Fecham.</th>
+                  <th>Faturam.</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Javascript rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: USERS & ACCESS (admin only) -->
+      <section id="view-users" class="view-section hidden">
+        <div class="card form-card" style="margin-bottom: 24px;">
+          <div class="card-header">
+            <h2 id="card-user-title">Novo Usuário</h2>
+            <p class="text-muted small">Crie contas de acesso e defina os perfis de permissão</p>
+          </div>
+          <form id="form-user" class="settings-form">
+            <input type="hidden" id="user-edit-id">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+              <div class="form-group-vertical">
+                <label for="user-name">Nome Completo</label>
+                <input type="text" id="user-name" class="form-input" placeholder="Ex: Weber Silva" required autocomplete="off">
+              </div>
+              <div class="form-group-vertical">
+                <label for="user-username">Login (usuário)</label>
+                <input type="text" id="user-username" class="form-input" placeholder="joao.silva" required autocomplete="off">
+              </div>
+              <div class="form-group-vertical">
+                <label for="user-password" id="label-user-password">Senha (mín. 6 caracteres)</label>
+                <input type="password" id="user-password" class="form-input" placeholder="••••••••" required autocomplete="new-password">
+              </div>
+              <div class="form-group-vertical">
+                <label for="user-role">Perfil de Acesso</label>
+                <select id="user-role" class="form-input" required>
+                  <option value="">-- Selecione --</option>
+                  <option value="admin">Administrador</option>
+                  <option value="supervisor">Supervisor de Equipe</option>
+                  <option value="sdr">SDR</option>
+                  <option value="closer">Consultor</option>
+                </select>
+              </div>
+              <div class="form-group-vertical" id="user-team-group" style="display:none;">
+                <label for="user-team-id" id="label-user-team">Equipe</label>
+                <select id="user-team-id" class="form-input">
+                  <option value="">-- Selecione a Equipe --</option>
+                </select>
+              </div>
+            </div>
+            <div style="display: flex; gap: 12px; margin-top: 12px; align-items: center;">
+              <button type="submit" id="btn-user-submit" class="btn btn-primary">
+                <i data-lucide="plus"></i> Criar Usuário
+              </button>
+              <button type="button" id="btn-user-cancel-edit" class="btn btn-secondary hidden" onclick="cancelUserEdit()">
+                Cancelar Edição
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card table-card">
+          <div class="card-header">
+            <h2>Usuários Cadastrados</h2>
+            <p class="text-muted small">Gerencie contas e permissões de acesso</p>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Nome Completo</th>
+                  <th>Login</th>
+                  <th>Perfil</th>
+                  <th>Equipe</th>
+                  <th class="text-center">Status</th>
+                  <th class="text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <tr><td colspan="6" class="text-center text-muted">Carregando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: BUSCA & TABULAÇÃO DE CLIENTES -->
+      <section id="view-crm-clientes" class="view-section hidden">
+        <div class="card filter-card">
+          <div style="display: flex; gap: 16px; align-items: center;">
+            <div style="flex: 1; position: relative;">
+              <input type="text" id="crm-search-input" class="form-input" placeholder="Buscar cliente por CPF, Nome ou Telefone..." style="padding-left: 40px; font-size: 15px; height: 48px;">
+              <i data-lucide="search" style="position: absolute; left: 14px; top: 15px; color: rgba(255,255,255,0.4); width: 20px; height: 20px;"></i>
+            </div>
+            <button id="btn-crm-search" class="btn btn-primary" style="height: 48px; padding: 0 24px; font-size: 15px;">
+              <i data-lucide="search"></i> Buscar
+            </button>
+            <button id="btn-crm-new-client" class="btn btn-secondary" style="height: 48px; padding: 0 20px; font-size: 15px;">
+              <i data-lucide="user-plus"></i> Novo Cliente
+            </button>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 380px 1fr; gap: 24px; margin-top: 20px;">
+          <!-- LISTA DE RESULTADOS DA BUSCA -->
+          <div class="card table-card" style="padding: 16px;">
+            <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--text-color); display: flex; align-items: center; justify-content: space-between;">
+              <span>Resultados Encontrados</span>
+              <span id="crm-search-count" class="badge info-badge">0</span>
+            </h3>
+            <div id="crm-search-results-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 600px; overflow-y: auto;">
+              <div class="text-muted text-center" style="padding: 30px 10px;">Digite um CPF, Nome ou Telefone para pesquisar no banco de dados.</div>
+            </div>
+          </div>
+
+          <!-- DETALHES DO CLIENTE & HISTÓRICO DE TABULAÇÕES -->
+          <div class="card form-card" id="crm-client-detail-card" style="padding: 24px;">
+            <div id="crm-client-empty-placeholder" class="text-center text-muted" style="padding: 60px 20px;">
+              <i data-lucide="user" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 12px;"></i>
+              <h3>Nenhum cliente selecionado</h3>
+              <p>Selecione um cliente da lista ao lado para ver a ficha completa, histórico de tabulações e movimentação nos Kanbans.</p>
+            </div>
+
+            <div id="crm-client-detail-content" class="hidden">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 20px;">
+                <div>
+                  <h2 id="crm-detail-nome" style="font-size: 22px; font-weight: 700; color: #fff;">—</h2>
+                  <div style="display: flex; gap: 16px; margin-top: 6px; font-size: 13px; color: rgba(255,255,255,0.7); flex-wrap: wrap;">
+                    <span><i data-lucide="credit-card" style="width: 14px; height: 14px; vertical-align: middle;"></i> CPF: <strong id="crm-detail-cpf" style="color: #fff;">—</strong></span>
+                    <span><i data-lucide="phone" style="width: 14px; height: 14px; vertical-align: middle;"></i> Tel: <strong id="crm-detail-telefone" style="color: #fff;">—</strong></span>
+                    <span id="crm-detail-valor-wrapper" class="hidden"><i data-lucide="circle-dollar-sign" style="width: 14px; height: 14px; vertical-align: middle; color: var(--accent-emerald);"></i> Contrato: <strong id="crm-detail-valor-val" style="color: var(--accent-emerald);">—</strong></span>
+                  </div>
+                </div>
+                <button id="btn-crm-open-tabulacao-modal" class="btn btn-primary">
+                  <i data-lucide="clipboard-edit"></i> Registrar Tabulação
+                </button>
+              </div>
+
+              <!-- TIMELINE DE TABULAÇÕES E HISTÓRICO -->
+              <div>
+                <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                  <i data-lucide="history" style="color: var(--primary-color);"></i> Histórico de Tabulações &amp; Passagem de Blocos
+                </h3>
+                <div id="crm-client-timeline" style="display: flex; flex-direction: column; gap: 16px; max-height: 480px; overflow-y: auto; padding-right: 8px;">
+                  <!-- Timeline dinamica via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: KANBAN SDR | COMERCIAL -->
+      <section id="view-crm-kanban-sdr" class="view-section hidden">
+        <div class="card filter-card" style="margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <h2 style="font-size: 18px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="kanban" style="color: #6366F1;"></i> Kanban SDR | Comercial
+              </h2>
+              <span class="badge info-badge" id="sdr-kanban-count-badge">0 cards</span>
+              <span class="badge" id="sdr-kanban-total-badge" style="background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">R$ 0,00</span>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <div class="custom-multiselect" style="width: 150px;">
+                <div class="custom-multiselect-trigger form-input" id="sdr-kanban-filter-user-trigger" style="font-size: 13px;">
+                  <span class="custom-multiselect-label">Todos os SDRs</span>
+                  <span class="custom-multiselect-arrow"></span>
+                </div>
+                <div class="custom-multiselect-menu hidden" id="sdr-kanban-filter-user-menu"></div>
+                <select id="sdr-kanban-filter-user" style="display:none;"></select>
+              </div>
+              <select id="sdr-kanban-filter-estagio" class="form-input" style="width: 150px; font-size: 13px;">
+                <option value="">Todas as Etapas</option>
+              </select>
+              <input type="text" id="sdr-kanban-search" class="form-input" placeholder="Buscar por Nome, CPF ou Tel..." style="width: 190px; font-size: 13px;">
+            </div>
+          </div>
+          <!-- LINHA DE FILTROS DE DATA -->
+          <div class="kanban-date-filter-bar" style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.06);">
+            <div style="display: inline-flex; align-items: center; gap: 6px;">
+              <span class="text-muted" style="font-size: 12px; white-space: nowrap;"><i data-lucide="calendar" style="width: 12px; height: 12px; vertical-align: middle;"></i> Critério:</span>
+              <select id="sdr-kanban-filter-tipo-data" class="form-input" style="width: 195px; font-size: 12px; padding: 5px 8px;">
+                <option value="etapa">Data de Entrada na Etapa</option>
+                <option value="criacao">Data de Criação do Lead</option>
+              </select>
+            </div>
+            <div style="display: inline-flex; align-items: center; gap: 6px;">
+              <span class="text-muted" style="font-size: 12px; white-space: nowrap;">Período:</span>
+              <select id="sdr-kanban-filter-periodo" class="form-input" style="width: 140px; font-size: 12px; padding: 5px 8px;">
+                <option value="todos">Todo o período</option>
+                <option value="hoje">Hoje</option>
+                <option value="ontem">Ontem</option>
+                <option value="7dias">Últimos 7 dias</option>
+                <option value="mes">Este Mês</option>
+                <option value="custom">Personalizado</option>
+              </select>
+            </div>
+            <div id="sdr-kanban-custom-dates" style="display: none; align-items: center; gap: 6px;">
+              <span class="text-muted" style="font-size: 12px;">De:</span>
+              <input type="date" id="sdr-kanban-date-de" class="form-input" style="width: 130px; font-size: 12px; padding: 4px 8px;">
+              <span class="text-muted" style="font-size: 12px;">Até:</span>
+              <input type="date" id="sdr-kanban-date-ate" class="form-input" style="width: 130px; font-size: 12px; padding: 4px 8px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- BOARD SDR -->
+        <div id="sdr-kanban-board" class="kanban-board-container">
+          <!-- Colunas e cards renderizados via JS -->
+        </div>
+      </section>
+
+      <!-- VIEW: KANBAN CONSULTOR | CLOSER -->
+      <section id="view-crm-kanban-closer" class="view-section hidden">
+        <div class="card filter-card" style="margin-bottom: 20px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 12px;">
+            <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+              <h2 style="font-size: 18px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="layout-grid" style="color: #3B82F6;"></i> Kanban Consultor | Closers
+              </h2>
+              <span class="badge info-badge" id="closer-kanban-count-badge">0 cards</span>
+              <span class="badge" id="closer-kanban-total-badge" style="background: rgba(16, 185, 129, 0.15); color: #34D399; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">R$ 0,00</span>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <div class="custom-multiselect" style="width: 145px;">
+                <div class="custom-multiselect-trigger form-input" id="closer-kanban-filter-user-trigger" style="font-size: 13px;">
+                  <span class="custom-multiselect-label">Todos os Closers</span>
+                  <span class="custom-multiselect-arrow"></span>
+                </div>
+                <div class="custom-multiselect-menu hidden" id="closer-kanban-filter-user-menu"></div>
+                <select id="closer-kanban-filter-user" style="display:none;"></select>
+              </div>
+              <div class="custom-multiselect" style="width: 135px;">
+                <div class="custom-multiselect-trigger form-input" id="closer-kanban-filter-sdr-trigger" style="font-size: 13px;">
+                  <span class="custom-multiselect-label">Todos os SDRs</span>
+                  <span class="custom-multiselect-arrow"></span>
+                </div>
+                <div class="custom-multiselect-menu hidden" id="closer-kanban-filter-sdr-menu"></div>
+                <select id="closer-kanban-filter-sdr" style="display:none;"></select>
+              </div>
+              <select id="closer-kanban-filter-estagio" class="form-input" style="width: 135px; font-size: 13px;">
+                <option value="">Todas as Etapas</option>
+              </select>
+              <input type="text" id="closer-kanban-search" class="form-input" placeholder="Buscar por Nome, CPF ou Tel..." style="width: 180px; font-size: 13px;">
+            </div>
+          </div>
+          <!-- LINHA DE FILTROS DE DATA -->
+          <div class="kanban-date-filter-bar" style="display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.06);">
+            <div style="display: inline-flex; align-items: center; gap: 6px;">
+              <span class="text-muted" style="font-size: 12px; white-space: nowrap;"><i data-lucide="calendar" style="width: 12px; height: 12px; vertical-align: middle;"></i> Critério:</span>
+              <select id="closer-kanban-filter-tipo-data" class="form-input" style="width: 195px; font-size: 12px; padding: 5px 8px;">
+                <option value="etapa">Data de Entrada na Etapa</option>
+                <option value="criacao">Data de Criação do Lead</option>
+              </select>
+            </div>
+            <div style="display: inline-flex; align-items: center; gap: 6px;">
+              <span class="text-muted" style="font-size: 12px; white-space: nowrap;">Período:</span>
+              <select id="closer-kanban-filter-periodo" class="form-input" style="width: 140px; font-size: 12px; padding: 5px 8px;">
+                <option value="todos">Todo o período</option>
+                <option value="hoje">Hoje</option>
+                <option value="ontem">Ontem</option>
+                <option value="7dias">Últimos 7 dias</option>
+                <option value="mes">Este Mês</option>
+                <option value="custom">Personalizado</option>
+              </select>
+            </div>
+            <div id="closer-kanban-custom-dates" style="display: none; align-items: center; gap: 6px;">
+              <span class="text-muted" style="font-size: 12px;">De:</span>
+              <input type="date" id="closer-kanban-date-de" class="form-input" style="width: 130px; font-size: 12px; padding: 4px 8px;">
+              <span class="text-muted" style="font-size: 12px;">Até:</span>
+              <input type="date" id="closer-kanban-date-ate" class="form-input" style="width: 130px; font-size: 12px; padding: 4px 8px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- BOARD CLOSER -->
+        <div id="closer-kanban-board" class="kanban-board-container">
+          <!-- Colunas e cards renderizados via JS -->
+        </div>
+      </section>
+
+      <!-- VIEW: RELATÓRIOS CRM ANALÍTICOS -->
+      <section id="view-crm-relatorios" class="view-section hidden">
+        <div class="view-header-flex" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+          <div>
+            <h2 style="display: flex; align-items: center; gap: 10px; font-size: 22px; margin: 0; color: #fff;">
+              <i data-lucide="bar-chart-3" style="color: #6366F1;"></i> Relatórios &amp; Inteligência CRM
+            </h2>
+            <p class="text-muted small" style="margin-top: 4px;">Visão analítica de perdas, prospecções, taxa de conversão e transição SDR ➔ Closer</p>
+          </div>
+
+          <!-- Filtros de Período e Responsável -->
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <select id="relatorio-filter-periodo" class="form-input" style="width: 150px; font-size: 13px;">
+              <option value="hoje">Hoje</option>
+              <option value="semana">Esta Semana</option>
+              <option value="mes" selected>Este Mês</option>
+              <option value="30d">Últimos 30 Dias</option>
+              <option value="custom">Período Personalizado</option>
+            </select>
+
+            <div id="relatorio-custom-dates" style="display: none; align-items: center; gap: 6px;">
+              <input type="date" id="relatorio-date-de" class="form-input" style="width: 130px; font-size: 12px;">
+              <span class="text-muted" style="font-size: 12px;">até</span>
+              <input type="date" id="relatorio-date-ate" class="form-input" style="width: 130px; font-size: 12px;">
+            </div>
+
+            <select id="relatorio-filter-sdr" class="form-input" style="width: 150px; font-size: 13px;">
+              <option value="all">Todos os SDRs</option>
+            </select>
+
+            <select id="relatorio-filter-closer" class="form-input" style="width: 150px; font-size: 13px;">
+              <option value="all">Todos os Closers</option>
+            </select>
+
+            <button type="button" id="btn-refresh-relatorios" class="btn btn-secondary" style="display: flex; align-items: center; gap: 6px; font-size: 13px;">
+              <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i> Atualizar
+            </button>
+          </div>
+        </div>
+
+        <!-- KPI CARDS SUMMARY -->
+        <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 24px;">
+          <!-- KPI 1: Prospectados -->
+          <div class="stat-card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Prospectados / Criados</span>
+              <div style="background: rgba(99, 102, 241, 0.15); color: #818CF8; padding: 8px; border-radius: 8px;">
+                <i data-lucide="user-plus" style="width: 20px; height: 20px;"></i>
+              </div>
+            </div>
+            <div style="font-size: 28px; font-weight: 700; color: #fff; margin-top: 8px;" id="kpi-rel-prospectados">0</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Novos leads no período</div>
+          </div>
+
+          <!-- KPI 2: Enviados ao Closer -->
+          <div class="stat-card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Passagens SDR ➔ Closer</span>
+              <div style="background: rgba(59, 130, 246, 0.15); color: #60A5FA; padding: 8px; border-radius: 8px;">
+                <i data-lucide="send" style="width: 20px; height: 20px;"></i>
+              </div>
+            </div>
+            <div style="font-size: 28px; font-weight: 700; color: #fff; margin-top: 8px;" id="kpi-rel-transferidos">0</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Leads encaminhados / Recebidos</div>
+          </div>
+
+          <!-- KPI 3: Vendas Concluídas -->
+          <!-- <div class="stat-card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Vendas Concluídas</span>
+              <div style="background: rgba(16, 185, 129, 0.15); color: #34D399; padding: 8px; border-radius: 8px;">
+                <i data-lucide="check-circle-2" style="width: 20px; height: 20px;"></i>
+              </div>
+            </div>
+            <div style="font-size: 28px; font-weight: 700; color: #34D399; margin-top: 8px;" id="kpi-rel-concluidos">0</div>
+          </div> -->
+
+          <!-- KPI 4: Perdas -->
+          <div class="stat-card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Perdas</span>
+              <div style="background: rgba(239, 68, 68, 0.15); color: #F87171; padding: 8px; border-radius: 8px;">
+                <i data-lucide="alert-triangle" style="width: 20px; height: 20px;"></i>
+              </div>
+            </div>
+            <div style="display: flex; align-items: baseline; gap: 8px; margin-top: 8px;">
+              <span style="font-size: 28px; font-weight: 700; color: #F87171;" id="kpi-rel-perdidos">0</span>
+              <span style="font-size: 14px; font-weight: 600; color: #F87171;" id="kpi-rel-taxa-perda">(0.0%)</span>
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Desistências e inviáveis</div>
+          </div>
+
+          <!-- KPI 5: SLA de Atendimento -->
+          <div class="stat-card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 13px; color: var(--text-muted); font-weight: 500;">Tempo Médio de Resposta</span>
+              <div style="background: rgba(245, 158, 11, 0.15); color: #FBBF24; padding: 8px; border-radius: 8px;">
+                <i data-lucide="clock" style="width: 20px; height: 20px;"></i>
+              </div>
+            </div>
+            <div style="font-size: 28px; font-weight: 700; color: #fff; margin-top: 8px;" id="kpi-rel-sla">0 min</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Média de aceite pelo Closer</div>
+          </div>
+        </div>
+
+        <!-- PAINÉIS PRINCIPAIS EM GRID -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-bottom: 24px;">
+
+          <!-- PAINEL 1: ANÁLISE DE PERDAS -->
+          <div class="card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="font-size: 16px; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0;">
+                <i data-lucide="pie-chart" style="color: #F87171;"></i> 1. Análise de Perdas &amp; Gargalos
+              </h3>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <!-- Motivos de Perda -->
+              <div>
+                <h4 style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Principais Motivos</h4>
+                <div id="chart-rel-motivos-perda" style="display: flex; flex-direction: column; gap: 10px;">
+                  <!-- Progress bars renderizadas via JS -->
+                </div>
+              </div>
+              <!-- Etapas com Maior Perda -->
+              <div>
+                <h4 style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Etapas com Maior Desistência</h4>
+                <div id="chart-rel-estagios-perda" style="display: flex; flex-direction: column; gap: 10px;">
+                  <!-- Progress bars renderizadas via JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- PAINEL 2: PROSPECÇÃO & META MENSAL -->
+          <div class="card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="font-size: 16px; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0;">
+                <i data-lucide="target" style="color: #818CF8;"></i> 2. Prospecção &amp; Atingimento de Meta
+              </h3>
+              <button type="button" id="btn-config-meta" class="btn btn-secondary" style="font-size: 11px; padding: 4px 10px;" title="Configurar Meta de Prospecção">
+                <i data-lucide="settings" style="width: 12px; height: 12px;"></i> Configurar Meta
+              </button>
+            </div>
+
+            <!-- Progresso da Meta -->
+            <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); padding: 14px; border-radius: 10px; margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; margin-bottom: 6px;">
+                <span>Progresso da Meta de Prospecção</span>
+                <span id="label-meta-percentual" style="color: #818CF8;">0%</span>
+              </div>
+              <div style="width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden; margin-bottom: 6px;">
+                <div id="bar-meta-progresso" style="width: 0%; height: 100%; background: linear-gradient(90deg, #6366F1, #10B981); transition: width 0.5s ease;"></div>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted);">
+                <span>Atingido: <strong id="val-meta-atingido" style="color: #fff;">0</strong> leads</span>
+                <span>Meta: <strong id="val-meta-alvo" style="color: #fff;">100</strong> leads/mês</span>
+              </div>
+            </div>
+
+            <!-- Evolução Diária -->
+            <h4 style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Evolução de Novos Leads</h4>
+            <div id="chart-rel-evolucao-diaria" style="display: flex; align-items: flex-end; gap: 6px; height: 90px; padding-top: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); overflow-x: auto;">
+              <!-- Barras diárias renderizadas via JS -->
+            </div>
+          </div>
+        </div>
+
+        <!-- PAINÉIS DE RANKING E FUNIL (2º GRID) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-bottom: 24px;">
+          
+          <!-- PAINEL 3: RANKING SDRs -->
+          <div class="card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="font-size: 16px; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0;">
+                <i data-lucide="send" style="color: #60A5FA;"></i> 4. Performance de SDRs (Passagens de Lead)
+              </h3>
+            </div>
+            <div class="table-container" style="max-height: 280px; overflow-y: auto;">
+              <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border-color); text-align: left; color: var(--text-muted);">
+                    <th style="padding: 8px;">SDR</th>
+                    <th style="padding: 8px; text-align: center;">Prospectados</th>
+                    <th style="padding: 8px; text-align: center;">Enviados ao Closer</th>
+                    <th style="padding: 8px; text-align: center;">Vendas Efetivadas</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-rel-ranking-sdrs">
+                  <!-- Trs renderizadas via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- PAINEL 4: RANKING CLOSERS -->
+          <div class="card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+              <h3 style="font-size: 16px; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0;">
+                <i data-lucide="award" style="color: #34D399;"></i> 4. Performance de Closers (Conversão)
+              </h3>
+            </div>
+            <div class="table-container" style="max-height: 280px; overflow-y: auto;">
+              <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <thead>
+                  <tr style="border-bottom: 1px solid var(--border-color); text-align: left; color: var(--text-muted);">
+                    <th style="padding: 8px;">Closer</th>
+                    <th style="padding: 8px; text-align: center;">Recebidos</th>
+                    <th style="padding: 8px; text-align: center;">Fechados</th>
+                  </tr>
+                </thead>
+                <tbody id="tbody-rel-ranking-closers">
+                  <!-- Trs renderizadas via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- PAINEL DETALHADO DE REGISTRO DE PERDAS RECENTES -->
+        <div class="card" style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--border-radius-lg); padding: 20px; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <h3 style="font-size: 16px; font-weight: 600; color: #fff; display: flex; align-items: center; gap: 8px; margin: 0;">
+              <i data-lucide="list-x" style="color: #F87171;"></i> Registros de Perdas Detalhados
+            </h3>
+          </div>
+          <div class="table-container" style="max-height: 320px; overflow-y: auto;">
+            <table class="data-table" style="width: 100%; border-collapse: collapse; font-size: 12px;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--border-color); text-align: left; color: var(--text-muted);">
+                  <th style="padding: 8px;">Data/Hora</th>
+                  <th style="padding: 8px;">Cliente</th>
+                  <th style="padding: 8px;">CPF / Tel</th>
+                  <th style="padding: 8px;">Etapa de Origem</th>
+                  <th style="padding: 8px;">Motivo da Perda</th>
+                  <th style="padding: 8px;">Usuário que Marcou</th>
+                  <th style="padding: 8px;">Observação</th>
+                </tr>
+              </thead>
+              <tbody id="tbody-rel-perdas-recentes">
+                <!-- Trs renderizadas via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW: ADMIN CRM & FILA -->
+      <section id="view-crm-admin" class="view-section hidden">
+        <div class="settings-grid">
+          
+          <!-- GESTÃO DINÂMICA DE ESTÁGIOS DO KANBAN -->
+          <div class="card form-card">
+            <div class="card-header">
+              <h2>Estágios do Kanban</h2>
+              <p class="text-muted small">Crie e reordene colunas do Kanban (SDR e Closer)</p>
+            </div>
+            <form id="form-crm-estagio" class="settings-form">
+              <div class="form-group-vertical">
+                <label for="estagio-nome">Nome da Coluna</label>
+                <input type="text" id="estagio-nome" class="form-input" placeholder="Ex: PROPOSTA SISTEMA" required>
+              </div>
+              <div class="form-group-vertical">
+                <label for="estagio-pipeline-tipo">Pipeline</label>
+                <select id="estagio-pipeline-tipo" class="form-input" required>
+                  <option value="sdr">SDR | Comercial</option>
+                  <option value="closer">Consultor | Closer</option>
+                </select>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-group-vertical">
+                  <label for="estagio-cor">Cor da Coluna</label>
+                  <input type="color" id="estagio-cor" class="form-input" value="#4F46E5" style="height: 42px; cursor: pointer;">
+                  <div class="color-presets-row" id="estagio-cor-presets">
+                    <div class="color-preset-dot" style="background:#4F46E5;" data-target="estagio-cor" data-color="#4F46E5" title="Índigo"></div>
+                    <div class="color-preset-dot" style="background:#7C3AED;" data-target="estagio-cor" data-color="#7C3AED" title="Violeta"></div>
+                    <div class="color-preset-dot" style="background:#0891B2;" data-target="estagio-cor" data-color="#0891B2" title="Ciano"></div>
+                    <div class="color-preset-dot" style="background:#059669;" data-target="estagio-cor" data-color="#059669" title="Esmeralda"></div>
+                    <div class="color-preset-dot" style="background:#D97706;" data-target="estagio-cor" data-color="#D97706" title="Âmbar"></div>
+                    <div class="color-preset-dot" style="background:#DC2626;" data-target="estagio-cor" data-color="#DC2626" title="Vermelho"></div>
+                    <div class="color-preset-dot" style="background:#DB2777;" data-target="estagio-cor" data-color="#DB2777" title="Rosa"></div>
+                    <div class="color-preset-dot" style="background:#475569;" data-target="estagio-cor" data-color="#475569" title="Cinza"></div>
+                  </div>
+                </div>
+                <div class="form-group-vertical">
+                  <label for="estagio-ordem">Ordem</label>
+                  <input type="number" id="estagio-ordem" class="form-input" value="1" min="1">
+                </div>
+              </div>
+              <div class="form-group-vertical">
+                <label for="estagio-motivos-perda">Motivos de Perda (separados por vírgula)</label>
+                <input type="text" id="estagio-motivos-perda" class="form-input" placeholder="Ex: Sem Margem, Desistência, Caixa Postal">
+              </div>
+
+              <!-- Seção Obrigatoriedades de Entrada -->
+              <div class="crm-stage-config-box">
+                <div class="crm-stage-box-header obrigatoriedades">
+                  <i data-lucide="shield-alert" style="width: 14px; height: 14px;"></i> Obrigatoriedades ao Mover para Esta Coluna
+                </div>
+                <div class="crm-switches-col">
+                  <label class="crm-switch switch-purple">
+                    <input type="checkbox" id="estagio-exigir-valor" class="crm-switch-input">
+                    <span class="crm-switch-track"></span>
+                    <span>Exigir <strong>Valor do Contrato (R$)</strong> preenchido</span>
+                  </label>
+                  <label class="crm-switch switch-purple">
+                    <input type="checkbox" id="estagio-exigir-email" class="crm-switch-input">
+                    <span class="crm-switch-track"></span>
+                    <span>Exigir <strong>E-mail válido</strong> cadastrado</span>
+                  </label>
+                  <label class="crm-switch switch-purple">
+                    <input type="checkbox" id="estagio-exigir-documentos" class="crm-switch-input">
+                    <span class="crm-switch-track"></span>
+                    <span>Exigir <strong>Documentos obrigatórios</strong> anexados</span>
+                  </label>
+                  <label class="crm-switch switch-purple">
+                    <input type="checkbox" id="estagio-exigir-dados-conta" class="crm-switch-input">
+                    <span class="crm-switch-track"></span>
+                    <span>Exigir <strong>Dados da Conta</strong> (Banco, Agência e Conta) preenchidos</span>
+                  </label>
+                  <label class="crm-switch switch-purple">
+                    <input type="checkbox" id="estagio-exigir-obs" class="crm-switch-input">
+                    <span class="crm-switch-track"></span>
+                    <span>Exigir <strong>observação</strong> ao registrar perda</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Seção Visibilidade no Card (antes de abrir) -->
+              <div class="crm-stage-config-box">
+                <div class="crm-stage-box-header vis-card">
+                  <i data-lucide="layout-template" style="width: 14px; height: 14px;"></i> Visibilidade nos Cards desta Coluna
+                  <span style="font-size:10px; font-weight:500; color: rgba(255,255,255,0.4); text-transform:none; letter-spacing:0;">— o que aparece no card sem abrir</span>
+                </div>
+                <div class="crm-switches-grid">
+                  <div class="crm-switches-col">
+                    <label class="crm-switch">
+                      <input type="checkbox" id="estagio-exibir-valor" checked class="crm-switch-input">
+                      <span class="crm-switch-track"></span>
+                      <span>Valor (R$)</span>
+                    </label>
+                    <label class="crm-switch">
+                      <input type="checkbox" id="estagio-exibir-cpf" checked class="crm-switch-input">
+                      <span class="crm-switch-track"></span>
+                      <span>CPF</span>
+                    </label>
+                    <label class="crm-switch">
+                      <input type="checkbox" id="estagio-exibir-telefone" checked class="crm-switch-input">
+                      <span class="crm-switch-track"></span>
+                      <span>Telefone</span>
+                    </label>
+                  </div>
+                  <div class="crm-switches-col">
+                    <label class="crm-switch">
+                      <input type="checkbox" id="estagio-exibir-email" class="crm-switch-input">
+                      <span class="crm-switch-track"></span>
+                      <span>E-mail</span>
+                    </label>
+                    <label class="crm-switch">
+                      <input type="checkbox" id="estagio-exibir-documentos" class="crm-switch-input">
+                      <span class="crm-switch-track"></span>
+                      <span>Status de Documentos</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Seção Visibilidade ao Abrir o Card (Modal) -->
+              <div class="crm-stage-config-box">
+                <div class="crm-stage-box-header vis-modal">
+                  <i data-lucide="panel-right-open" style="width: 14px; height: 14px;"></i> Visibilidade ao Abrir o Card (Modal)
+                  <span style="font-size:10px; font-weight:500; color: rgba(255,255,255,0.4); text-transform:none; letter-spacing:0;">— seções visíveis no detalhe do lead</span>
+                </div>
+                <div class="crm-switches-grid">
+                  <div class="crm-switches-col">
+                    <label class="crm-switch switch-emerald">
+                      <input type="checkbox" id="estagio-modal-exibir-valor" checked class="crm-switch-input">
+                      <span class="crm-switch-track"></span>
+                      <span>Campo Valor do Contrato</span>
+                    </label>
+                    <label class="crm-switch switch-emerald">
+                      <input type="checkbox" id="estagio-modal-exibir-email" checked class="crm-switch-input">
+                      <span class="crm-switch-track"></span>
+                      <span>Campo E-mail</span>
+                    </label>
+                    <label class="crm-switch switch-emerald">
+                      <input type="checkbox" id="estagio-modal-exibir-docs" checked class="crm-switch-input">
+                      <span class="crm-switch-track"></span>
+                      <span>Bloco de Documentos (Drive)</span>
+                    </label>
+                  </div>
+                  <div class="crm-switches-col">
+                    <label class="crm-switch switch-emerald">
+                      <input type="checkbox" id="estagio-modal-exibir-obs" checked class="crm-switch-input">
+                      <span class="crm-switch-track"></span>
+                      <span>Anotações & Observações</span>
+                    </label>
+                    <label class="crm-switch switch-emerald">
+                      <input type="checkbox" id="estagio-modal-exibir-historico" checked class="crm-switch-input">
+                      <span class="crm-switch-track"></span>
+                      <span>Histórico de Tabulações</span>
+                    </label>
+                    <label class="crm-switch switch-emerald">
+                      <input type="checkbox" id="estagio-modal-exibir-closer" checked class="crm-switch-input">
+                      <span class="crm-switch-track"></span>
+                      <span>Seletor de Closer</span>
+                    </label>
+                    <label class="crm-switch switch-emerald">
+                      <input type="checkbox" id="estagio-modal-exibir-dados-bancarios" class="crm-switch-input">
+                      <span class="crm-switch-track"></span>
+                      <span>Dados da Conta (Banco/Ag/Conta)</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Seção SLA / Alerta de Card Parado -->
+              <div class="crm-stage-config-box">
+                <div class="crm-stage-box-header sla">
+                  <i data-lucide="timer" style="width: 14px; height: 14px;"></i> Alerta de SLA — Card Parado na Coluna
+                </div>
+                <div style="font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:10px;">
+                  Defina o limite de horas. Se o lead ultrapassar esse tempo sem ser movido, um alerta aparece no card.
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <input type="number" id="estagio-sla-horas" class="form-input" placeholder="Ex: 48" min="1" style="width:110px; height:36px; font-size:13px;">
+                  <span style="font-size:13px; color:rgba(255,255,255,0.5);">horas</span>
+                </div>
+                <div class="sla-presets-row">
+                  <span style="font-size:11px; color:rgba(255,255,255,0.4);">Rápido:</span>
+                  <button type="button" class="sla-preset-btn" data-target="estagio-sla-horas" data-val="12">12h</button>
+                  <button type="button" class="sla-preset-btn" data-target="estagio-sla-horas" data-val="24">24h</button>
+                  <button type="button" class="sla-preset-btn" data-target="estagio-sla-horas" data-val="48">48h</button>
+                  <button type="button" class="sla-preset-btn" data-target="estagio-sla-horas" data-val="72">72h</button>
+                  <button type="button" class="sla-preset-btn" data-target="estagio-sla-horas" data-val="">Sem limite</button>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary" style="margin-top: 8px;">
+                <i data-lucide="plus"></i> Cadastrar Coluna
+              </button>
+            </form>
+
+            <hr class="card-divider">
+            <div class="list-wrapper">
+              <h3>Colunas Ativas</h3>
+              <ul class="settings-list" id="list-crm-estagios">
+                <!-- Preenchido via JS -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- GESTÃO DA FILA DOS CLOSERS (ROUND-ROBIN COM PESOS) -->
+          <div class="card form-card">
+            <div class="card-header">
+              <h2>Fila de Distribuição de Closers</h2>
+              <p class="text-muted small">Alterne consultores ativos e defina pesos de distribuição</p>
+            </div>
+            <form id="form-crm-fila" class="settings-form">
+              <div class="form-group-vertical">
+                <label for="fila-closer-id">Selecionar Consultor</label>
+                <select id="fila-closer-id" class="form-input" required>
+                  <option value="">-- Selecione o Usuário --</option>
+                </select>
+              </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-group-vertical">
+                  <label for="fila-peso">Peso (Prioridade)</label>
+                  <input type="number" id="fila-peso" class="form-input" value="1" min="1" max="10">
+                </div>
+                <div class="form-group-vertical">
+                  <label for="fila-ordem">Ordem Fila</label>
+                  <input type="number" id="fila-ordem" class="form-input" value="1" min="1">
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary" style="margin-top: 8px;">
+                <i data-lucide="plus"></i> Adicionar à Fila
+              </button>
+            </form>
+
+            <hr class="card-divider">
+            <div class="list-wrapper">
+              <h3>Consultores na Fila</h3>
+              <ul class="settings-list" id="list-crm-fila">
+                <!-- Preenchido via JS -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- CANAIS DE VENDA (ORIGENS) -->
+          <div class="card form-card">
+            <div class="card-header">
+              <h2>Canais de Venda</h2>
+              <p class="text-muted small">Cadastre e gerencie os canais/origens de captação de clientes</p>
+            </div>
+            <form id="form-crm-canal-venda" class="settings-form" onsubmit="addCrmCanalVenda(event)">
+              <div class="form-group-vertical">
+                <label for="input-crm-canal-nome">Nome do Canal</label>
+                <input type="text" id="input-crm-canal-nome" class="form-input" placeholder="Ex: WhatsApp, Instagram, Discadora" required>
+              </div>
+              <button type="submit" class="btn btn-primary" style="margin-top: 8px;">
+                <i data-lucide="plus"></i> Cadastrar Canal
+              </button>
+            </form>
+
+            <hr class="card-divider">
+            <div class="list-wrapper">
+              <h3>Canais Ativos</h3>
+              <ul class="settings-list" id="list-crm-canais">
+                <!-- Preenchido via JS -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- MAPEAMENTO DISCADORA <-> CRM -->
+          <div class="card form-card">
+            <div class="card-header">
+              <h2>Mapeamento da Discadora</h2>
+              <p class="text-muted small">Vincule o login do operador na discadora ao usuário do CRM</p>
+            </div>
+            <form id="form-crm-discadora-map" class="settings-form">
+              <div class="form-group-vertical">
+                <label for="map-discadora-login">Login na Discadora (ex: oper_joao)</label>
+                <input type="text" id="map-discadora-login" class="form-input" placeholder="oper_joao" required>
+              </div>
+              <div class="form-group-vertical">
+                <label for="map-crm-user-id">Usuário no CRM</label>
+                <select id="map-crm-user-id" class="form-input" required>
+                  <option value="">-- Selecione o Usuário CRM --</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary" style="margin-top: 8px;">
+                <i data-lucide="link"></i> Mapear Operador
+              </button>
+            </form>
+
+            <hr class="card-divider">
+            <div class="list-wrapper">
+              <h3>Mapeamentos Ativos</h3>
+              <ul class="settings-list" id="list-crm-discadora-map">
+                <!-- Preenchido via JS -->
+              </ul>
+            </div>
+          </div>
+
+          <!-- INTEGRAÇÃO GOOGLE DRIVE -->
+          <div class="card form-card">
+            <div class="card-header">
+              <h2 style="display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="cloud" style="color: #38BDF8;"></i> Integração Google Drive
+              </h2>
+              <p class="text-muted small">Status da conexão OAuth2 e armazenamento de documentos</p>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+                <div>
+                  <strong style="color: #fff; display: block; font-size: 14px;">Status da Conexão</strong>
+                  <span id="crm-drive-status-desc" class="text-muted small">Verificando comunicação...</span>
+                </div>
+                <span id="crm-drive-status-badge" class="badge" style="background: rgba(156,163,175,0.15); color: #9CA3AF;">Verificando</span>
+              </div>
+
+              <div class="form-group-vertical" style="margin-top: 4px;">
+                <label for="whitelabel-drive-folder-id" style="font-weight: 600; color: #E2E8F0;">ID da Pasta Pai do Google Drive</label>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="whitelabel-drive-folder-id" class="form-input" placeholder="Ex: 1i8cjtY2JlU7YZ2I_jiNv7-SauYJGSSZ3" style="flex: 1;">
+                  <button type="button" onclick="saveWhitelabelDriveFolder()" class="btn btn-primary" style="white-space: nowrap; padding: 0 16px;">
+                    <i data-lucide="save"></i> Salvar Pasta
+                  </button>
+                </div>
+                <span class="text-muted small" style="margin-top: 4px; display: block; font-size: 11px;">Insira o ID da pasta do Google Drive onde as pastas individuais de cada lead serão geradas automaticamente.</span>
+              </div>
+
+              <div style="background: rgba(59,130,246,0.06); border: 1px solid rgba(59,130,246,0.2); border-radius: 8px; padding: 12px; font-size: 12px; color: rgba(255,255,255,0.8); line-height: 1.5;">
+                <strong style="color: #60A5FA; display: block; margin-bottom: 4px;">Atenção ao Erro "invalid_grant":</strong>
+                Se os uploads pararem de funcionar após 7 dias, significa que o app está em modo <em>"Em Teste"</em> no Google Cloud Console. Para que a autorização nunca expire, altere o status do app para <em>"Em Produção"</em> na tela de consentimento OAuth do Google.
+              </div>
+
+              <a href="/api/auth/google" target="_blank" class="btn btn-primary" style="text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <i data-lucide="refresh-cw"></i> Conectar / Reconectar Conta Google Drive
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL: CADASTRAR NOVO CLIENTE -->
+  <div id="modal-novo-cliente" class="modal-backdrop hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    <div class="card form-card" style="width: 500px; max-width: 90vw; background: #181b2a; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 18px; font-weight: 700; color: #fff;">Cadastrar Novo Cliente</h2>
+        <button type="button" onclick="closeNewClientModal()" style="background: none; border: none; color: #fff; opacity: 0.6; cursor: pointer;"><i data-lucide="x"></i></button>
+      </div>
+      <form id="form-novo-cliente" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+        <div class="form-group-vertical">
+          <label for="modal-cliente-nome">Nome do Cliente *</label>
+          <input type="text" id="modal-cliente-nome" class="form-input" placeholder="Digite o nome completo" required>
+        </div>
+        <div class="form-group-vertical">
+          <label for="modal-cliente-cpf">CPF *</label>
+          <input type="text" id="modal-cliente-cpf" class="form-input" placeholder="000.000.000-00" maxlength="14" required autocomplete="off">
+          <div id="modal-cliente-cpf-warning" class="hidden" style="margin-top: 6px; padding: 8px 12px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); border-radius: 6px; font-size: 12px; color: #fca5a5; display: flex; justify-content: space-between; align-items: center;">
+            <span id="modal-cliente-cpf-warning-text">⚠️ Cliente já cadastrado com este CPF!</span>
+            <button type="button" id="btn-ver-cliente-duplicado" class="btn btn-secondary btn-small" style="padding: 2px 8px; font-size: 11px; margin-left: 8px; white-space: nowrap; background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); color: #fff;">Ver Cliente</button>
+          </div>
+        </div>
+        <div class="form-group-vertical">
+          <label for="modal-cliente-telefone">Telefone / WhatsApp *</label>
+          <input type="text" id="modal-cliente-telefone" class="form-input" placeholder="(00) 00000-0000" maxlength="15" required autocomplete="off">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+          <button type="button" onclick="closeNewClientModal()" class="btn btn-secondary">Cancelar</button>
+          <button type="submit" id="btn-submit-novo-cliente" class="btn btn-primary">Cadastrar Cliente</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REGISTRAR TABULAÇÃO MANUALLY -->
+  <div id="modal-tabulacao" class="modal-backdrop hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    <div class="card form-card" style="width: 500px; max-width: 90vw; background: #181b2a; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 20px 50px rgba(0,0,0,0.8);">
+      <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 18px; font-weight: 700; color: #fff;">Nova Tabulação de Atendimento</h2>
+        <button type="button" onclick="closeTabulacaoModal()" style="background: none; border: none; color: #fff; opacity: 0.6; cursor: pointer;"><i data-lucide="x"></i></button>
+      </div>
+      <form id="form-tabulacao" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+        <input type="hidden" id="modal-tabulacao-cliente-id">
+        <div class="form-group-vertical">
+          <label for="modal-tabulacao-canal-id">Canal de Venda *</label>
+          <select id="modal-tabulacao-canal-id" class="form-input" required>
+            <option value="">-- Selecione o Canal de Venda --</option>
+          </select>
+        </div>
+
+        <div class="form-group-vertical">
+          <label for="modal-tabulacao-tipo">Resultado / Tabulação *</label>
+          <select id="modal-tabulacao-tipo" class="form-input" required>
+            <option value="">-- Selecione a Etapa --</option>
+          </select>
+        </div>
+
+        <div class="form-group-vertical">
+          <label for="modal-tabulacao-obs">Observações do Atendimento</label>
+          <textarea id="modal-tabulacao-obs" class="form-input" rows="3" placeholder="Digite detalhes da conversa..."></textarea>
+        </div>
+
+        <div class="form-group-vertical">
+          <label for="modal-tabulacao-valor">Valor do Contrato (R$)</label>
+          <input type="text" id="modal-tabulacao-valor" class="form-input" placeholder="Ex: R$ 15.440,33">
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+          <button type="button" class="btn btn-secondary" onclick="closeTabulacaoModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary"><i data-lucide="check"></i> Salvar Tabulação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DETALHES DO LEAD / CLIENTE (Interativo ao clicar no card) -->
+  <div id="modal-lead-details" class="modal-backdrop hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    <div class="card form-card" style="width: 650px; max-width: 95vw; background: #141724; border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 25px 60px rgba(0,0,0,0.9); border-radius: 14px; padding: 24px; max-height: 90vh; overflow-y: auto;">
+      
+      <!-- Cabeçalho do Modal -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px;">
+        <div>
+          <span id="modal-lead-badge-estagio" class="badge info-badge" style="font-size: 11px; margin-bottom: 6px; display: inline-block;">CONTATO INICIAL</span>
+          <h2 id="modal-lead-nome" style="font-size: 22px; font-weight: 700; color: #fff; margin-top: 4px;">—</h2>
+          <div style="display: flex; gap: 16px; margin-top: 8px; font-size: 13px; color: rgba(255,255,255,0.7); flex-wrap: wrap;">
+            <span><i data-lucide="credit-card" style="width: 14px; height: 14px; vertical-align: middle;"></i> <strong id="modal-lead-cpf" style="color: #fff;">—</strong></span>
+            <span><i data-lucide="phone" style="width: 14px; height: 14px; vertical-align: middle;"></i> <strong id="modal-lead-telefone" style="color: #fff;">—</strong></span>
+            <span><i data-lucide="user" style="width: 14px; height: 14px; vertical-align: middle;"></i> Responsável: <strong id="modal-lead-consultor" style="color: #fff;">—</strong></span>
+            <span id="modal-lead-sdr-wrapper" class="hidden"><i data-lucide="send" style="width: 14px; height: 14px; vertical-align: middle; color: #C084FC;"></i> SDR: <strong id="modal-lead-sdr" style="color: #C084FC;">—</strong></span>
+            <span id="modal-lead-valor-wrapper" class="hidden"><i data-lucide="circle-dollar-sign" style="width: 14px; height: 14px; vertical-align: middle; color: var(--accent-emerald);"></i> Contrato: <strong id="modal-lead-valor-val" style="color: var(--accent-emerald);">—</strong></span>
+          </div>
+        </div>
+        <button type="button" onclick="closeLeadDetailsModal()" style="background: none; border: none; color: #fff; opacity: 0.6; cursor: pointer; padding: 4px;">
+          <i data-lucide="x" style="width: 24px; height: 24px;"></i>
+        </button>
+      </div>
+
+      <!-- Formulário de Observações e Movimentação -->
+      <form id="form-modal-lead-details" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+        <input type="hidden" id="modal-lead-id">
+        <input type="hidden" id="modal-lead-cliente-id">
+
+        <!-- Campo de Nota Privada (Exclusiva para este Card do Kanban - Posição Superior) -->
+        <div class="form-group-vertical" style="background: rgba(249, 115, 22, 0.05); border: 1px solid rgba(249, 115, 22, 0.25); border-radius: 10px; padding: 10px 14px; margin: 0;">
+          <label for="modal-lead-nota-privada" style="font-weight: 600; color: #FB923C; font-size: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+            <span style="display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="sticky-note" style="width: 14px; height: 14px; color: #F97316;"></i>
+              Nota Privada (Apenas para este Card)
+            </span>
+            <span class="text-muted" style="font-weight: 400; font-size: 11px;">Não fica no histórico global do cliente</span>
+          </label>
+          <textarea id="modal-lead-nota-privada" class="form-input" rows="2" placeholder="Escreva anotações internas/privadas para a equipe neste card do Kanban..." style="font-size: 13px; line-height: 1.4; padding: 8px 10px; background: rgba(0,0,0,0.25); border: 1px solid rgba(249, 115, 22, 0.25); color: #fff; border-radius: 6px; height: 52px; min-height: 44px; resize: vertical;"></textarea>
+        </div>
+
+        <!-- Barra de Ações Rápidas e Movimentação (Alinhamento Perfeito) -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; gap: 10px; align-items: stretch; flex-wrap: wrap;">
+            <button type="button" id="btn-modal-lead-full-history" class="btn btn-secondary" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 42px; padding: 0 16px; border-radius: 8px; font-weight: 600; white-space: nowrap;">
+              <i data-lucide="history" style="width: 15px; height: 15px;"></i> Ver Ficha Completa
+            </button>
+            <div style="flex: 1; min-width: 240px; background: rgba(255,255,255,0.03); padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; gap: 10px;">
+              <label for="modal-lead-select-estagio" style="font-weight: 600; color: #fff; font-size: 12px; white-space: nowrap; margin: 0;">Mover para:</label>
+              <select id="modal-lead-select-estagio" class="form-input" style="height: 36px; margin: 0; flex: 1;">
+                <!-- Opções renderizadas via JS -->
+              </select>
+            </div>
+          </div>
+          <div id="modal-lead-closer-group" class="form-group-vertical hidden" style="margin: 0; background: rgba(255,255,255,0.03); padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08);">
+            <label for="modal-lead-select-closer" style="font-weight: 600; color: #fff; font-size: 12px; margin-bottom: 4px;">Closer Responsável:</label>
+            <select id="modal-lead-select-closer" class="form-input" style="height: 38px; margin: 0;">
+              <!-- Opções renderizadas via JS -->
+            </select>
+          </div>
+        </div>
+
+        <!-- Linha: Valor e E-mail (Flexbox responsivo) -->
+        <div id="modal-lead-contract-row" style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <!-- Valor do Contrato (Editável) -->
+          <div id="modal-lead-valor-group" class="form-group-vertical" style="flex: 1; min-width: 220px; margin: 0;">
+            <label for="modal-lead-valor" style="font-weight: 600; color: #fff; font-size: 13px; margin-bottom: 4px;">Valor do Contrato (R$)</label>
+            <input type="text" id="modal-lead-valor" class="form-input" placeholder="Ex: 15.440,33" style="height: 40px;">
+          </div>
+
+          <!-- E-mail do Cliente (Editável) -->
+          <div id="modal-lead-email-group" class="form-group-vertical hidden" style="flex: 1; min-width: 220px; margin: 0;">
+            <label for="modal-lead-email" style="font-weight: 600; color: #fff; font-size: 13px; margin-bottom: 4px;">E-mail do Cliente</label>
+            <input type="email" id="modal-lead-email" class="form-input" placeholder="Ex: cliente@email.com" style="height: 40px;">
+          </div>
+        </div>
+
+        <!-- Container de Dados Bancários (Conta para Crédito) -->
+        <div id="modal-lead-banco-wrapper" class="hidden form-group-vertical" style="background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 14px; margin: 0;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="landmark" style="color: var(--y, #f7cb45); width: 15px; height: 15px;"></i>
+              <span style="font-weight: 600; color: #fff; font-size: 13px;">Dados Bancários</span>
+            </div>
+            <span class="text-muted" style="font-size: 11px;">Conta para crédito</span>
+          </div>
+          <div style="display: grid; grid-template-columns: 2fr 1fr 1.2fr; gap: 10px;">
+            <div>
+              <label for="modal-lead-banco" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Banco</label>
+              <input type="text" id="modal-lead-banco" list="bancos-sugestoes" class="form-input" placeholder="Ex: Nubank, Caixa, BB..." style="height: 38px; font-size: 13px;">
+              <datalist id="bancos-sugestoes">
+                <option value="Banco do Brasil"></option>
+                <option value="Caixa Econômica Federal"></option>
+                <option value="Bradesco"></option>
+                <option value="Itaú Unibanco"></option>
+                <option value="Santander"></option>
+                <option value="Nubank"></option>
+                <option value="Banco Inter"></option>
+                <option value="C6 Bank"></option>
+                <option value="Banrisul"></option>
+                <option value="Sicoob"></option>
+                <option value="Sicredi"></option>
+                <option value="Mercado Pago"></option>
+                <option value="PicPay"></option>
+              </datalist>
+            </div>
+            <div>
+              <label for="modal-lead-agencia" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Agência</label>
+              <input type="text" id="modal-lead-agencia" class="form-input" placeholder="Ex: 0001" style="height: 38px; font-size: 13px;">
+            </div>
+            <div>
+              <label for="modal-lead-conta" style="font-size: 11px; font-weight: 600; color: #a1a1aa; margin-bottom: 4px; display: block;">Conta com Dígito</label>
+              <input type="text" id="modal-lead-conta" class="form-input" placeholder="Ex: 12345-6" style="height: 38px; font-size: 13px;">
+            </div>
+          </div>
+        </div>
+
+        <!-- Campo de Observações Livres -->
+        <div class="form-group-vertical">
+          <label for="modal-lead-obs" style="font-weight: 600; color: #fff; font-size: 13px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Anotações &amp; Observações do Lead</span>
+            <span class="text-muted" style="font-weight: 400; font-size: 11px;">Salvo na ficha do cliente</span>
+          </label>
+          <textarea id="modal-lead-obs" class="form-input" rows="4" placeholder="Digite informações importantes sobre a conversa, simulação, propostas ou pendências..." style="font-size: 14px; line-height: 1.5; padding: 12px;"></textarea>
+        </div>
+
+        <!-- Container de Documentação (Google Drive) - Exibido apenas em NEGOCIAÇÃO -->
+        <div id="modal-lead-docs-wrapper" class="hidden" style="margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px; margin-bottom: 8px;">
+          <h3 style="font-size: 13px; font-weight: 600; color: #fff; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="folder-open" style="color: var(--accent-blue, #60a5fa); width: 16px; height: 16px;"></i>
+            Documentação do Cliente (<a href="https://www.ilovepdf.com/pt/jpg_para_pdf" target="_blank" rel="noopener noreferrer" style="color: #60a5fa; text-decoration: underline; text-underline-offset: 2px;" title="Clique para converter JPG em PDF no iLovePDF">Apenas PDF</a>)
+          </h3>
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <!-- Documento 1: Contracheque -->
+            <div class="doc-box" style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: #E5E7EB;">Contracheque</span>
+              <div id="doc-contracheque-status" class="doc-status-area">
+                <!-- Injetado dinamicamente -->
+              </div>
+            </div>
+            
+            <!-- Documento 2: Extrato de Consignação -->
+            <div class="doc-box" style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: #E5E7EB;">Extrato de Consignação</span>
+              <div id="doc-extrato-status" class="doc-status-area">
+                <!-- Injetado dinamicamente -->
+              </div>
+            </div>
+            
+            <!-- Documento 3: Documento de Identificação -->
+            <div class="doc-box" style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: #E5E7EB;">Documento de Identificação</span>
+              <div id="doc-identificacao-status" class="doc-status-area">
+                <!-- Injetado dinamicamente -->
+              </div>
+            </div>
+            
+            <!-- Documento 4: Comprovante de Residência -->
+            <div class="doc-box" style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: #E5E7EB;">Comprovante de Residência</span>
+              <div id="doc-residencia-status" class="doc-status-area">
+                <!-- Injetado dinamicamente -->
+              </div>
+            </div>
+            
+            <!-- Documento 5: Espelho da Proposta -->
+            <div class="doc-box" style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px;">
+              <span style="font-size: 11px; font-weight: 600; color: #E5E7EB;">Espelho da Proposta</span>
+              <div id="doc-espelho-status" class="doc-status-area">
+                <!-- Injetado dinamicamente -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Histórico Recente de Tabulações -->
+        <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+          <h4 style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="clock" style="width: 14px; height: 14px; color: var(--accent-blue);"></i> Últimos Atendimentos Registrados
+          </h4>
+          <div id="modal-lead-recent-history" style="display: flex; flex-direction: column; gap: 8px; max-height: 150px; overflow-y: auto;">
+            <div class="text-muted" style="font-size: 12px;">Carregando histórico...</div>
+          </div>
+        </div>
+
+        <!-- Botões de Ação do Formulário -->
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
+          <button type="button" id="btn-modal-lead-loss" class="btn" style="background: #dc3545; color: #fff; border: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; padding: 10px 16px; border-radius: var(--border-radius-md); margin-right: auto;" onclick="openLossReasonModal(event)">
+            <i data-lucide="x-circle"></i> MARCAR PERDA
+          </button>
+          <button type="button" id="btn-modal-lead-transfer-closer" class="btn hidden" style="background: var(--accent-emerald); color: #fff; border: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; padding: 10px 16px; border-radius: var(--border-radius-md);" onclick="handleTransferToCloserClick(event)">
+            <i data-lucide="check-check"></i> RESOLVIDO
+          </button>
+          <button type="button" class="btn btn-secondary" onclick="closeLeadDetailsModal()">Fechar</button>
+          <button type="submit" class="btn btn-primary"><i data-lucide="check"></i> Salvar Alterações</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL DE TRANSFERENCIA CONCLUIDA PARA CLOSER -->
+  <div id="modal-transfer-closer-confirm" class="modal-backdrop hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 9999;">
+    <div class="modal-content" style="max-width: 480px; text-align: center; padding: 32px 24px; background: var(--bg-card); border: 1px solid var(--accent-emerald); border-radius: var(--border-radius-lg); box-shadow: var(--shadow-main);">
+      <div style="width: 64px; height: 64px; background: rgba(16,185,129,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+        <i data-lucide="check-circle-2" style="width: 36px; height: 36px; color: #10B981;"></i>
+      </div>
+      <h2 style="font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 12px;">Lead Transferido!</h2>
+      <p style="font-size: 14px; color: rgba(255,255,255,0.8); line-height: 1.6; margin-bottom: 24px; text-align: left;">
+        O Closer sorteado para este atendimento foi:<br>
+        <strong id="modal-transfer-closer-name" style="font-size: 20px; color: #10B981; display: block; margin: 12px 0; text-align: center;">—</strong>
+        <span style="color: var(--accent-yellow); font-weight: 700; display: inline-flex; align-items: center; gap: 4px; margin-top: 8px;">
+          <i data-lucide="alert-triangle" style="width: 14px; height: 14px;"></i> ATENÇÃO:
+        </span>
+        Transfira o atendimento no <strong>WhatsApp</strong> para o Closer acima antes de prosseguir.
+      </p>
+      <button type="button" class="btn" style="width: 100%; justify-content: center; background: #10B981; color: #fff; font-weight: 600; border: none; padding: 12px; border-radius: var(--border-radius-md); cursor: pointer; display: flex; align-items: center; gap: 8px;" onclick="confirmTransferCloserCiente()">
+        <i data-lucide="check"></i> CIENTE
+      </button>
+    </div>
+  </div>
+
+  <!-- MODAL DE SELEÇÃO DE MOTIVO DE PERDA -->
+  <div id="modal-loss-reason-confirm" class="modal-backdrop hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 99999;">
+    <div class="modal-content" style="max-width: 440px; width: 90%; padding: 24px; background: var(--bg-card); border: 1px solid #dc3545; border-radius: var(--border-radius-lg); box-shadow: var(--shadow-main);">
+      <div style="width: 48px; height: 48px; background: rgba(220,53,69,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
+        <i data-lucide="x-circle" style="width: 28px; height: 28px; color: #dc3545;"></i>
+      </div>
+      <h2 style="font-size: 18px; font-weight: 700; color: #fff; text-align: center; margin-bottom: 16px;">Marcar Lead como Perdido</h2>
+      
+      <form id="form-confirm-loss" style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="form-group-vertical">
+          <label for="loss-reason-select">Motivo da Perda</label>
+          <select id="loss-reason-select" class="form-input" required>
+            <option value="">-- Selecione o Motivo --</option>
+          </select>
+        </div>
+        <div class="form-group-vertical">
+          <label for="loss-observation">Observação</label>
+          <textarea id="loss-observation" class="form-input" placeholder="Observações adicionais (opcional)" style="height: 80px; resize: none;"></textarea>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+          <button type="button" class="btn btn-secondary" onclick="closeLossReasonModal()">Cancelar</button>
+          <button type="submit" class="btn" style="background: #dc3545; color: #fff; font-weight: 600; border: none; padding: 10px 16px; border-radius: var(--border-radius-md); cursor: pointer; display: inline-flex; align-items: center; gap: 6px;"><i data-lucide="check"></i> Confirmar Perda</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL EDITAR ESTÁGIO -->
+  <div id="modal-edit-estagio" class="modal-backdrop hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 16px; box-sizing: border-box;">
+    <div class="modal-content" style="max-width: 540px; width: 100%; max-height: 90vh; background: var(--bg-card); border: 1px solid var(--accent-blue); border-radius: var(--border-radius-lg); box-shadow: 0 20px 60px rgba(0,0,0,0.8); display: flex; flex-direction: column; overflow: hidden;">
+      
+      <!-- Cabeçalho Fixo do Modal -->
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); background: #1a1d2d; flex-shrink: 0;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <i data-lucide="layout-grid" style="width: 18px; height: 18px; color: var(--accent-blue);"></i>
+          <h2 style="font-size: 17px; font-weight: 700; color: #fff; margin: 0;">Editar Coluna do Kanban</h2>
+        </div>
+        <button type="button" onclick="closeEditEstagioModal()" style="background: none; border: none; color: #fff; opacity: 0.6; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center;" title="Fechar">
+          <i data-lucide="x" style="width: 20px; height: 20px;"></i>
+        </button>
+      </div>
+
+      <!-- Formulário com Rolagem Interna -->
+      <form id="form-edit-crm-estagio" class="settings-form" style="display: flex; flex-direction: column; gap: 14px; padding: 18px 20px; overflow-y: auto; flex: 1;">
+        <input type="hidden" id="edit-estagio-id">
+        <div class="form-group-vertical">
+          <label for="edit-estagio-nome">Nome da Coluna</label>
+          <input type="text" id="edit-estagio-nome" class="form-input" required>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-group-vertical">
+            <label for="edit-estagio-cor">Cor da Coluna</label>
+            <input type="color" id="edit-estagio-cor" class="form-input" style="height: 42px; cursor: pointer;">
+            <div class="color-presets-row">
+              <div class="color-preset-dot" style="background:#4F46E5;" data-target="edit-estagio-cor" data-color="#4F46E5" title="Índigo"></div>
+              <div class="color-preset-dot" style="background:#7C3AED;" data-target="edit-estagio-cor" data-color="#7C3AED" title="Violeta"></div>
+              <div class="color-preset-dot" style="background:#0891B2;" data-target="edit-estagio-cor" data-color="#0891B2" title="Ciano"></div>
+              <div class="color-preset-dot" style="background:#059669;" data-target="edit-estagio-cor" data-color="#059669" title="Esmeralda"></div>
+              <div class="color-preset-dot" style="background:#D97706;" data-target="edit-estagio-cor" data-color="#D97706" title="Âmbar"></div>
+              <div class="color-preset-dot" style="background:#DC2626;" data-target="edit-estagio-cor" data-color="#DC2626" title="Vermelho"></div>
+              <div class="color-preset-dot" style="background:#DB2777;" data-target="edit-estagio-cor" data-color="#DB2777" title="Rosa"></div>
+              <div class="color-preset-dot" style="background:#475569;" data-target="edit-estagio-cor" data-color="#475569" title="Cinza"></div>
+            </div>
+          </div>
+          <div class="form-group-vertical">
+            <label for="edit-estagio-ordem">Ordem</label>
+            <input type="number" id="edit-estagio-ordem" class="form-input" min="1">
+          </div>
+        </div>
+        <div class="form-group-vertical">
+          <label for="edit-estagio-motivos-perda">Motivos de Perda (separados por vírgula)</label>
+          <input type="text" id="edit-estagio-motivos-perda" class="form-input" placeholder="Ex: Sem Margem, Desistência, Caixa Postal">
+        </div>
+
+        <!-- Seção Obrigatoriedades de Entrada -->
+        <div class="crm-stage-config-box">
+          <div class="crm-stage-box-header obrigatoriedades">
+            <i data-lucide="shield-alert" style="width: 14px; height: 14px;"></i> Obrigatoriedades ao Mover para Esta Coluna
+          </div>
+          <div class="crm-switches-col">
+            <label class="crm-switch switch-purple">
+              <input type="checkbox" id="edit-estagio-exigir-valor" class="crm-switch-input">
+              <span class="crm-switch-track"></span>
+              <span>Exigir <strong>Valor do Contrato (R$)</strong> preenchido</span>
+            </label>
+            <label class="crm-switch switch-purple">
+              <input type="checkbox" id="edit-estagio-exigir-email" class="crm-switch-input">
+              <span class="crm-switch-track"></span>
+              <span>Exigir <strong>E-mail válido</strong> cadastrado</span>
+            </label>
+            <label class="crm-switch switch-purple">
+              <input type="checkbox" id="edit-estagio-exigir-documentos" class="crm-switch-input">
+              <span class="crm-switch-track"></span>
+              <span>Exigir <strong>Documentos obrigatórios</strong> anexados</span>
+            </label>
+            <label class="crm-switch switch-purple">
+              <input type="checkbox" id="edit-estagio-exigir-dados-conta" class="crm-switch-input">
+              <span class="crm-switch-track"></span>
+              <span>Exigir <strong>Dados da Conta</strong> (Banco, Agência e Conta) preenchidos</span>
+            </label>
+            <label class="crm-switch switch-purple">
+              <input type="checkbox" id="edit-estagio-exigir-obs" class="crm-switch-input">
+              <span class="crm-switch-track"></span>
+              <span>Exigir <strong>observação</strong> ao registrar perda</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Seção Visibilidade no Card (antes de abrir) -->
+        <div class="crm-stage-config-box">
+          <div class="crm-stage-box-header vis-card">
+            <i data-lucide="layout-template" style="width: 14px; height: 14px;"></i> Visibilidade nos Cards desta Coluna
+            <span style="font-size:10px; font-weight:500; color: rgba(255,255,255,0.4); text-transform:none; letter-spacing:0;">— o que aparece no card sem abrir</span>
+          </div>
+          <div class="crm-switches-grid">
+            <div class="crm-switches-col">
+              <label class="crm-switch">
+                <input type="checkbox" id="edit-estagio-exibir-valor" checked class="crm-switch-input">
+                <span class="crm-switch-track"></span>
+                <span>Valor (R$)</span>
+              </label>
+              <label class="crm-switch">
+                <input type="checkbox" id="edit-estagio-exibir-cpf" checked class="crm-switch-input">
+                <span class="crm-switch-track"></span>
+                <span>CPF</span>
+              </label>
+              <label class="crm-switch">
+                <input type="checkbox" id="edit-estagio-exibir-telefone" checked class="crm-switch-input">
+                <span class="crm-switch-track"></span>
+                <span>Telefone</span>
+              </label>
+            </div>
+            <div class="crm-switches-col">
+              <label class="crm-switch">
+                <input type="checkbox" id="edit-estagio-exibir-email" class="crm-switch-input">
+                <span class="crm-switch-track"></span>
+                <span>E-mail</span>
+              </label>
+              <label class="crm-switch">
+                <input type="checkbox" id="edit-estagio-exibir-documentos" class="crm-switch-input">
+                <span class="crm-switch-track"></span>
+                <span>Status de Documentos</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção Visibilidade ao Abrir o Card (Modal) -->
+        <div class="crm-stage-config-box">
+          <div class="crm-stage-box-header vis-modal">
+            <i data-lucide="panel-right-open" style="width: 14px; height: 14px;"></i> Visibilidade ao Abrir o Card (Modal)
+            <span style="font-size:10px; font-weight:500; color: rgba(255,255,255,0.4); text-transform:none; letter-spacing:0;">— seções visíveis no detalhe do lead</span>
+          </div>
+          <div class="crm-switches-grid">
+            <div class="crm-switches-col">
+              <label class="crm-switch switch-emerald">
+                <input type="checkbox" id="edit-estagio-modal-exibir-valor" checked class="crm-switch-input">
+                <span class="crm-switch-track"></span>
+                <span>Campo Valor do Contrato</span>
+              </label>
+              <label class="crm-switch switch-emerald">
+                <input type="checkbox" id="edit-estagio-modal-exibir-email" checked class="crm-switch-input">
+                <span class="crm-switch-track"></span>
+                <span>Campo E-mail</span>
+              </label>
+              <label class="crm-switch switch-emerald">
+                <input type="checkbox" id="edit-estagio-modal-exibir-docs" checked class="crm-switch-input">
+                <span class="crm-switch-track"></span>
+                <span>Bloco de Documentos (Drive)</span>
+              </label>
+            </div>
+            <div class="crm-switches-col">
+              <label class="crm-switch switch-emerald">
+                <input type="checkbox" id="edit-estagio-modal-exibir-obs" checked class="crm-switch-input">
+                <span class="crm-switch-track"></span>
+                <span>Anotações &amp; Observações</span>
+              </label>
+              <label class="crm-switch switch-emerald">
+                <input type="checkbox" id="edit-estagio-modal-exibir-historico" checked class="crm-switch-input">
+                <span class="crm-switch-track"></span>
+                <span>Histórico de Tabulações</span>
+              </label>
+              <label class="crm-switch switch-emerald">
+                <input type="checkbox" id="edit-estagio-modal-exibir-closer" checked class="crm-switch-input">
+                <span class="crm-switch-track"></span>
+                <span>Seletor de Closer</span>
+              </label>
+              <label class="crm-switch switch-emerald">
+                <input type="checkbox" id="edit-estagio-modal-exibir-dados-bancarios" class="crm-switch-input">
+                <span class="crm-switch-track"></span>
+                <span>Dados da Conta (Banco/Ag/Conta)</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Seção SLA / Alerta de Card Parado -->
+        <div class="crm-stage-config-box">
+          <div class="crm-stage-box-header sla">
+            <i data-lucide="timer" style="width: 14px; height: 14px;"></i> Alerta de SLA — Card Parado na Coluna
+          </div>
+          <div style="font-size:12px; color:rgba(255,255,255,0.5); margin-bottom:10px;">
+            Defina o limite de horas. Se o lead ultrapassar esse tempo sem ser movido, um alerta aparece no card.
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <input type="number" id="edit-estagio-sla-horas" class="form-input" placeholder="Ex: 48" min="1" style="width:110px; height:36px; font-size:13px;">
+            <span style="font-size:13px; color:rgba(255,255,255,0.5);">horas</span>
+          </div>
+          <div class="sla-presets-row">
+            <span style="font-size:11px; color:rgba(255,255,255,0.4);">Rápido:</span>
+            <button type="button" class="sla-preset-btn" data-target="edit-estagio-sla-horas" data-val="12">12h</button>
+            <button type="button" class="sla-preset-btn" data-target="edit-estagio-sla-horas" data-val="24">24h</button>
+            <button type="button" class="sla-preset-btn" data-target="edit-estagio-sla-horas" data-val="48">48h</button>
+            <button type="button" class="sla-preset-btn" data-target="edit-estagio-sla-horas" data-val="72">72h</button>
+            <button type="button" class="sla-preset-btn" data-target="edit-estagio-sla-horas" data-val="">Sem limite</button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Rodapé Fixo com Botões de Ação -->
+      <div style="display: flex; justify-content: flex-end; align-items: center; gap: 10px; padding: 14px 20px; border-top: 1px solid rgba(255,255,255,0.08); background: #1a1d2d; flex-shrink: 0;">
+        <button type="button" class="btn btn-secondary" onclick="closeEditEstagioModal()">Cancelar</button>
+        <button type="submit" form="form-edit-crm-estagio" class="btn btn-primary"><i data-lucide="check"></i> Salvar Alterações</button>
+      </div>
+
+    </div>
+  </div>
+
+
+
+  
+      
+
+
+  <!-- TOAST NOTIFICATION -->
+  <div id="toast" class="toast hidden">
+    <div class="toast-content">
+      <i id="toast-icon" data-lucide="info"></i>
+      <span id="toast-message">Mensagem de aviso</span>
+    </div>
+  </div>
+
+  <!-- App Main Javascript -->
+  <script src="js/app.js?v=3"></script>
+  <!-- CRM & Kanban Module Javascript -->
+  <script src="js/crm.js?v=7"></script>
+</body>
+</html>
