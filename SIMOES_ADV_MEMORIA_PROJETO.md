@@ -64,7 +64,7 @@ GRANT ALL PRIVILEGES ON DATABASE simoesadv TO simoesadv;
    GOOGLE_CLIENT_ID="seu_google_client_id.apps.googleusercontent.com"
    GOOGLE_CLIENT_SECRET="seu_google_client_secret"
    GOOGLE_REDIRECT_URI="https://simoesadv.vps11814.panel.icontainer.work/api/crm/auth/google/callback"
-   GOOGLE_DRIVE_PARENT_FOLDER_ID=""
+   GOOGLE_DRIVE_PARENT_FOLDER_ID="1OFMwMIyPUryXFOdBDYt46MP0dA_mHUCC"
    ```
 
 ---
